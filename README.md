@@ -103,7 +103,7 @@ Feel free to fork the repo and submit a pull request.
 
 ## 📌 Status
 
-```text
+```
 🚧 Project Status: Active Development
 ```
 
@@ -115,9 +115,10 @@ This project is open-source and available under the MIT License.
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Authors
 
 **Revant Singh**
+**Nidhiansh Chauhan**
 
 ---
 
