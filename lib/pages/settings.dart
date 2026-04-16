@@ -18,11 +18,9 @@ class _SettingsState extends State<Settings>{
       appBar: AppBar(
         title: const Text("S E T T I N G S"),
       ),
-      body:Padding(
+      body:ListView(
         padding: const EdgeInsets.all(16),
-        child:Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        children:[
             const Text(
               "Notifications" ,
                 style: TextStyle(fontSize: 22),
@@ -108,14 +106,13 @@ class _SettingsState extends State<Settings>{
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ListTile(
-                      title:Text("Theme",style: TextStyle(fontSize: 20),)
+
                   ) ,
                 ],
               ),
             ),
           ],
         ),
-      ),
     );
   }
   Future<void> pickStartTime()async{
