@@ -5,12 +5,15 @@ class Settings extends StatefulWidget {
   @override
   State<Settings> createState()=> _SettingsState();
 }
+enum ThemeOption { light, dark, system }
 class _SettingsState extends State<Settings>{
+  ThemeOption selectedTheme = ThemeOption.system;
   TimeOfDay startTime = TimeOfDay(hour: 22, minute: 0);
   TimeOfDay endTime=TimeOfDay(hour: 7, minute: 0);
   bool isEnabled=true;
   bool enabled=true;
   String selectSound = "Default";
+  String selectFontSize="Default";
   bool quietEnabled=false;
   @override
   Widget build(BuildContext context) {
@@ -103,11 +106,56 @@ class _SettingsState extends State<Settings>{
               elevation: 2,
               margin: EdgeInsets.symmetric(horizontal: 16,vertical: 8),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ListTile(
 
-                  ) ,
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      "Themes",
+                      style: TextStyle(fontSize: 19),
+                    ),
+                  ),
+                  RadioListTile<ThemeOption>(
+                    title: Text("Light"),
+                    value: ThemeOption.light,
+                    groupValue: selectedTheme,
+                    onChanged: (val) {
+                      setState(() {
+                        selectedTheme = val!;
+                      });
+                    },
+                  ),
+
+                  RadioListTile<ThemeOption>(
+                    title: Text("Dark"),
+                    value: ThemeOption.dark,
+                    groupValue: selectedTheme,
+                    onChanged: (val) {
+                      setState(() {
+                        selectedTheme = val!;
+                      });
+                    },
+                  ),
+
+                  // RadioListTile<ThemeOption>(
+                  //   title: Text("System Default"),
+                  //   value: ThemeOption.system,
+                  //   groupValue: selectedTheme,
+                  //   onChanged: (val) {
+                  //     setState(() {
+                  //       selectedTheme = val!;
+                  //     });
+                  //   },
+                  // ),
+                  Divider(),
+                  ListTile(title:Text("Font Size"),subtitle:Text("Select App's font size"),
+                    trailing:DropdownButton<String>(value:selectFontSize,underline: SizedBox(),
+                      items:["Default","Small","Medium","Large"].map((e)=>DropdownMenuItem(value :e,child:Text(e)))
+                          .toList(),onChanged: (val)=>setFontSize(()=>selectFontSize=val!),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -136,5 +184,7 @@ class _SettingsState extends State<Settings>{
   void setVibrate(bool Function() param0){}
 
   void setSound(String Function() param0) {}
+
+  void setFontSize(String Function() param0) {}
 
 }
