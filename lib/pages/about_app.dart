@@ -15,7 +15,9 @@ class AboutApp extends StatelessWidget{
             Text("Version 1.0.0", style: TextStyle(fontSize: 18)),
             SizedBox(height: 10),
             Text("CodeAlert helps developers track important alerts and updates in real-time.",style: TextStyle(fontSize: 18),),
-
+            Text("Created by:"),
+            Text("Revant Singh"),
+            Text("Nidhiansh Chauhan"),
           ]
 
       ),
