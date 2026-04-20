@@ -18,8 +18,16 @@ class AboutApp extends StatelessWidget{
             Text("Created by:"),
             Text("Revant Singh"),
             Text("Nidhiansh Chauhan"),
-          ]
+            ListTile(
+              title: Text("GitHub"),
+              trailing: Icon(Icons.open_in_new),
+            ),
 
+            ListTile(
+              title: Text("Rate App"),
+              trailing: Icon(Icons.star),
+            ),
+        ]
       ),
     );
   }
