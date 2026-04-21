@@ -10,6 +10,26 @@ class Reminders extends StatelessWidget{
         appBar: AppBar(
           title : const Text("Set Reminders"),
         ),
+      body:ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Card(
+            child: ListTile(
+              leading: Icon(Icons.alarm),
+              title: Text("Solve DSA problems"),
+              subtitle: Text("8:00 PM"),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.edit),
+                  SizedBox(width: 10),
+                  Icon(Icons.delete),
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 }
