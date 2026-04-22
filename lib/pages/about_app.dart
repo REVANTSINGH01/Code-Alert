@@ -8,26 +8,23 @@ class AboutApp extends StatelessWidget{
       appBar: AppBar(
         title : const Text("App Info"),
       ),
-      body:Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("CodeAlert", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),),
-            Text("Version 1.0.0", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 10),
-            Text("CodeAlert helps developers track important alerts and updates in real-time.",style: TextStyle(fontSize: 18),),
-            Text("Created by:"),
-            Text("Revant Singh"),
-            Text("Nidhiansh Chauhan"),
-            ListTile(
-              title: Text("GitHub"),
-              trailing: Icon(Icons.open_in_new),
-            ),
-
-            ListTile(
-              title: Text("Rate App"),
-              trailing: Icon(Icons.star),
-            ),
-        ]
+      body: Column(
+        children: [
+          SizedBox(height: 20),
+          CircleAvatar(
+            radius: 40,
+            backgroundImage: AssetImage("assets/images/ic_launcher.png"),
+          ),
+          SizedBox(height: 10),
+          Text(
+            "CodeAlert",
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            "Version 1.0.0",
+            style: TextStyle(color: Colors.grey),
+          ),
+        ],
       ),
     );
   }
