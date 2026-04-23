@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 class AboutApp extends StatelessWidget{
   const AboutApp ({super.key});
 
@@ -52,14 +53,14 @@ class AboutApp extends StatelessWidget{
                   leading: Icon(Icons.code),
                   title: Text("GitHub"),
                   trailing: Icon(Icons.open_in_new),
-                  onTap: () {},
+                  onTap:openGitHub,
                 ),
                 Divider(),
                 ListTile(
                   leading: Icon(Icons.star),
                   title: Text("Rate App"),
                   trailing: Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {},
+                  onTap: (){},
                 ),
               ],
             ),
@@ -68,11 +69,11 @@ class AboutApp extends StatelessWidget{
       ),
     );
   }
-  // Future<void> openGitHub() async {
-  //   final Uri url = Uri.parse("https://github.com/REVANTSINGH01/Code-Alert");
-  //
-  //   if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-  //     throw 'Could not launch $url';
-  //   }
-  // }
+  Future<void> openGitHub() async {
+    final Uri url = Uri.parse("https://github.com/REVANTSINGH01/Code-Alert");
+
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw 'Could not launch $url';
+    }
+  }
 }
