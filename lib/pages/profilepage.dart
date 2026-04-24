@@ -57,14 +57,6 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
 
-            Card(
-              child: ListTile(
-                leading: Icon(Icons.people),
-                title: Text("Friends"),
-                trailing: Text("5"),
-              ),
-            ),
-
             const SizedBox(height: 20),
 
             ElevatedButton(

@@ -33,7 +33,10 @@ class AboutApp extends StatelessWidget{
             child: Padding(
               padding: EdgeInsets.all(12),
               child: Text(
-                "CodeAlert helps developers track important alerts and updates in real-time.",
+                "CodeAlert helps developers track important alerts and updates in real-time.",style: TextStyle(
+                fontSize: 15,
+                height: 1.4,
+              ),
               ),
             ),
           ),
@@ -63,6 +66,13 @@ class AboutApp extends StatelessWidget{
                   onTap: (){},
                 ),
               ],
+            ),
+          ),
+          Text(
+            "© 2026 CodeAlert",
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 12,
             ),
           )
         ],

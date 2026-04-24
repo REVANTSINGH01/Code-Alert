@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import '../provider/theme_provider.dart';
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme=context.watch<ThemeProvider>();
+    Color textColor= theme.bgColor==Colors.black?Colors.white:Colors.black;
     return Scaffold(
+      backgroundColor: theme.bgColor,
       appBar: AppBar(
         title: const Text("CodeAlert"),
       ),
@@ -40,7 +45,7 @@ class HomePage extends StatelessWidget {
 
             ListTile(
               leading: const Icon(Icons.home),
-              title: const Text("H O M E"),
+              title:  Text("H O M E"),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context,'/home_page');
@@ -48,7 +53,7 @@ class HomePage extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.remember_me),
-              title: const Text("R E M I N D E R"),
+              title:  Text("R E M I N D E R"),
               onTap:(){
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/reminders');
@@ -56,7 +61,7 @@ class HomePage extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.person),
-              title: const Text("P R O F I L E"),
+              title:  Text("P R O F I L E"),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/profilepage');
@@ -64,7 +69,7 @@ class HomePage extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.info),
-              title: const Text("A B O U T   A P P"),
+              title:  Text("A B O U T   A P P"),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/about_app');
@@ -87,7 +92,7 @@ class HomePage extends StatelessWidget {
                   // logout logic
                 },
                 icon: const Icon(Icons.logout),
-                label: const Text("Logout"),
+                label:  Text("Logout"),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 45),
                 ),
@@ -106,7 +111,7 @@ class HomePage extends StatelessWidget {
           }
 
           if(index == 1){
-            Navigator.pushNamed(context, '/reminders');
+            Navigator.pushNamed(context, '/');
           }
 
           if(index == 2){
@@ -131,20 +136,22 @@ class HomePage extends StatelessWidget {
 
         ],
       ),
-      body: Padding(
+      body:DefaultTextStyle(
+          style: TextStyle(color: textColor),
+        child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            const Text(
+            Text(
               "Welcome Back, Revant 👋",
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 10),
 
-            const Text(
+            Text(
               "Upcoming Contests",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
@@ -179,10 +186,11 @@ class HomePage extends StatelessWidget {
               onPressed: () {
                 Navigator.pushNamed(context, '/reminders');
               },
-              child: const Text("Set Reminder"),
+              child:  Text("Set Reminder"),
             ),
           ],
         ),
+      ),
       ),
     );
   }

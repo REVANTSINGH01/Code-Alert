@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../provider/theme_provider.dart';
+
 class Settings extends StatefulWidget {
   const Settings({super.key});
 
   @override
   State<Settings> createState()=> _SettingsState();
 }
-enum ThemeOption { light, dark, system }
+
 class _SettingsState extends State<Settings>{
-  ThemeOption selectedTheme = ThemeOption.system;
   TimeOfDay startTime = TimeOfDay(hour: 22, minute: 0);
   TimeOfDay endTime=TimeOfDay(hour: 7, minute: 0);
   bool isEnabled=true;
@@ -17,14 +19,19 @@ class _SettingsState extends State<Settings>{
   bool quietEnabled=false;
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+    Color textColor= theme.bgColor==Colors.black?Colors.white:Colors.black;
     return Scaffold(
+      backgroundColor: theme.bgColor,
       appBar: AppBar(
         title: const Text("S E T T I N G S"),
       ),
-      body:ListView(
+
+      body:DefaultTextStyle(
+        style: TextStyle(color: textColor),child:ListView(
         padding: const EdgeInsets.all(16),
         children:[
-            const Text(
+            Text(
               "Notifications" ,
                 style: TextStyle(fontSize: 22),
             ),
@@ -61,7 +68,7 @@ class _SettingsState extends State<Settings>{
                   ],
               ),
             ),
-            const Text("Quiet Hours",style:TextStyle(fontSize:22)),
+            Text("Quiet Hours",style:TextStyle(fontSize:22)),
             Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12)
@@ -98,7 +105,7 @@ class _SettingsState extends State<Settings>{
                 ],
               ),
             ),
-            const Text("Appearance",style:TextStyle(fontSize: 22)),
+            Text("Appearance",style:TextStyle(fontSize: 22)),
             Card(
               shape:RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -117,26 +124,23 @@ class _SettingsState extends State<Settings>{
                       style: TextStyle(fontSize: 19),
                     ),
                   ),
-                  RadioListTile<ThemeOption>(
-                    title: Text("Light"),
-                    value: ThemeOption.light,
-                    groupValue: selectedTheme,
+                  RadioGroup<ThemeOption>(
+                    groupValue: theme.selectedTheme,
                     onChanged: (val) {
-                      setState(() {
-                        selectedTheme = val!;
-                      });
+                      if(val!=null)context.read<ThemeProvider>().changeTheme(val);
                     },
-                  ),
-
-                  RadioListTile<ThemeOption>(
-                    title: Text("Dark"),
-                    value: ThemeOption.dark,
-                    groupValue: selectedTheme,
-                    onChanged: (val) {
-                      setState(() {
-                        selectedTheme = val!;
-                      });
-                    },
+                    child: Column(
+                      children: [
+                        RadioListTile(
+                          value: ThemeOption.light,
+                          title: Text("Light"),
+                        ),
+                        RadioListTile(
+                          value: ThemeOption.dark,
+                          title: Text("Dark"),
+                        ),
+                      ],
+                    ),
                   ),
 
                   // RadioListTile<ThemeOption>(
@@ -161,6 +165,7 @@ class _SettingsState extends State<Settings>{
             ),
           ],
         ),
+      ),
     );
   }
   Future<void> pickStartTime()async{

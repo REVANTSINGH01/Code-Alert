@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'provider/theme_provider.dart';
 import 'package:my_app/pages/home_page.dart';
 import 'package:my_app/pages/profilepage.dart';
 import 'package:my_app/pages/settings.dart';
@@ -7,7 +9,11 @@ import 'package:my_app/pages/reminders.dart';
 
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(create: (_)=>ThemeProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
