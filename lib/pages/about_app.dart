@@ -11,11 +11,11 @@ class AboutApp extends StatelessWidget {
     final theme = context.watch<ThemeProvider>();
 
     // 🎨 Dynamic colors
-    Color textColor =
     theme.bgColor == Colors.black ? Colors.white : Colors.black;
-
+    Color textColor=theme.bgColor==const Color(0xFF121212)?Colors.white:Colors.black;
+    Color bgColor=theme.bgColor==const Color(0xFF121212)?const Color(0xFF1E1E1E):Colors.white;
     Color cardColor =
-    theme.bgColor == Colors.black ? const Color(0xFF1E1E1E) : Colors.white;
+    theme.bgColor == const Color(0xFF121212) ? const Color(0xFF1E1E1E) : Colors.white;
 
     return Scaffold(
       backgroundColor: theme.bgColor,
@@ -26,6 +26,7 @@ class AboutApp extends StatelessWidget {
         iconTheme: IconThemeData(color: textColor),
         title: Text(
           "App Info",
+
           style: TextStyle(color: textColor),
         ),
       ),
@@ -60,9 +61,7 @@ class AboutApp extends StatelessWidget {
               Text(
                 "Version 1.0.0",
                 style: TextStyle(
-                  color: theme.bgColor == Colors.black
-                      ? Colors.grey[400]
-                      : Colors.grey[700],
+                  color:textColor,
                 ),
               ),
 
@@ -75,11 +74,11 @@ class AboutApp extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Padding(
+                child:  Padding(
                   padding: EdgeInsets.all(12),
                   child: Text(
                     "CodeAlert helps developers track important alerts and updates in real-time.",
-                    style: TextStyle(fontSize: 15, height: 1.4),
+                    style: TextStyle(color:textColor,fontSize: 15, height: 1.4),
                   ),
                 ),
               ),
@@ -88,12 +87,12 @@ class AboutApp extends StatelessWidget {
               Card(
                 color: cardColor,
                 margin: const EdgeInsets.all(12),
-                child: const ListTile(
+                child: ListTile(
                   leading: Icon(Icons.person),
-                  title: Text("Developers"),
+                  title: Text("Developers",style: TextStyle(color: textColor)),
                   subtitle: Text(
                     "Revant Singh\nNidhiansh Chauhan",
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16,color: textColor),
                   ),
                 ),
               ),
@@ -106,14 +105,14 @@ class AboutApp extends StatelessWidget {
                   children: [
                     ListTile(
                       leading: const Icon(Icons.code),
-                      title: const Text("GitHub"),
+                      title:Text("GitHub",style:TextStyle(color: textColor)),
                       trailing: const Icon(Icons.open_in_new),
                       onTap: openGitHub,
                     ),
                     const Divider(),
                     ListTile(
                       leading: const Icon(Icons.star),
-                      title: const Text("Rate App"),
+                      title: Text("Rate App",style:TextStyle(color: textColor)),
                       trailing:
                       const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {},
@@ -128,9 +127,7 @@ class AboutApp extends StatelessWidget {
               Text(
                 "© 2026 CodeAlert",
                 style: TextStyle(
-                  color: theme.bgColor == Colors.black
-                      ? Colors.grey[500]
-                      : Colors.grey,
+                  color: textColor,
                   fontSize: 12,
                 ),
               ),

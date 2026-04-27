@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
+import '../provider/theme_provider.dart';
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+
+    // 🎨 Dynamic colors
+    theme.bgColor == Colors.black ? Colors.white : Colors.black;
+    Color textColor=theme.bgColor==const Color(0xFF121212)?Colors.white:Colors.black;
+    Color bgColor=theme.bgColor==const Color(0xFF121212)?const Color(0xFF1E1E1E):Colors.white;
+    Color cardColor =
+    theme.bgColor == const Color(0xFF121212) ? const Color(0xFF1E1E1E) : Colors.white;
     return Scaffold(
+      backgroundColor: theme.bgColor,
       appBar: AppBar(
-        title: const Text("Profile"),
+        backgroundColor: theme.bgColor,
+        iconTheme: IconThemeData(color: textColor),
+        title:  Text("Profile",style: TextStyle(color: textColor)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -21,47 +33,53 @@ class ProfilePage extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            const Text(
+             Text(
               "Revant Singh",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: TextStyle(color: textColor,fontSize: 22, fontWeight: FontWeight.bold),
             ),
 
-            const Text(
+            Text(
               "Competitive Programmer",
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: textColor),
             ),
 
             const SizedBox(height: 20),
 
             Card(
+              color: cardColor,
               child: ListTile(
-                leading: Icon(Icons.code),
-                title: Text("LeetCode Rating"),
-                trailing: Text("1850"),
+                leading: Icon(Icons.code,color:textColor,),
+                title: Text("LeetCode Rating",style: TextStyle(color: textColor)),
+                trailing: Text("1850",style: TextStyle(color: textColor)),
               ),
             ),
 
             Card(
+              color: cardColor,
               child: ListTile(
-                leading: Icon(Icons.star),
-                title: Text("Codeforces Rating"),
-                trailing: Text("1600"),
+                leading: Icon(Icons.star,color: textColor,),
+                title: Text("Codeforces Rating",style: TextStyle(color: textColor)),
+                trailing: Text("1600",style: TextStyle(color: textColor)),
               ),
             ),
 
             Card(
+              color: cardColor,
               child: ListTile(
-                leading: Icon(Icons.notifications),
-                title: Text("Active Reminders"),
-                trailing: Text("3"),
+                leading: Icon(Icons.notifications,color: textColor,),
+                title: Text("Active Reminders",style: TextStyle(color: textColor)),
+                trailing: Text("3",style: TextStyle(color: textColor)),
               ),
             ),
 
             const SizedBox(height: 20),
 
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: cardColor,
+              ),
               onPressed: () {},
-              child: const Text("Edit Profile"),
+              child: Text("Edit Profile",style: TextStyle(color: textColor)),
             )
           ],
         ),

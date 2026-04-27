@@ -10,7 +10,7 @@ class ThemeProvider extends ChangeNotifier{
         bgColor=Colors.white;
         break;
       case ThemeOption.dark:
-        bgColor=Colors.black;
+        bgColor=const Color(0xFF121212);
         break;
     }
   notifyListeners();

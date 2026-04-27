@@ -8,41 +8,46 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme=context.watch<ThemeProvider>();
-    Color textColor= theme.bgColor==Colors.black?Colors.white:Colors.black;
-    Color cardColor=theme.bgColor==Colors.black?Colors.grey:Colors.white;
+    Color textColor= theme.bgColor==const Color(0xFF121212)?Colors.white:Colors.black;
+    Color cardColor=theme.bgColor==const Color(0xFF121212)?const Color(0xFF1E1E1E):Colors.white;
     return Scaffold(
       backgroundColor: theme.bgColor,
       appBar: AppBar(
-        title: const Text("CodeAlert"),
+        backgroundColor: theme.bgColor,
+        title: Text("CodeAlert",
+        style: TextStyle(color: textColor),),
+        iconTheme: IconThemeData(
+          color:textColor,
+        ),
       ),
       drawer: Drawer(
         child: ListView(
           children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: Colors.blue),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-                  CircleAvatar(
-                    radius: 28,
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.person, size: 30, color: Colors.blue),
-                  ),
-
-                  SizedBox(height: 10),
-
-                  Text(
-                    "Coder",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // DrawerHeader(
+            //   decoration: BoxDecoration(color: Colors.blue),
+            //   child: Column(
+            //     crossAxisAlignment: CrossAxisAlignment.start,
+            //     children: [
+            //
+            //       CircleAvatar(
+            //         radius: 28,
+            //         backgroundColor: Colors.white,
+            //         child: Icon(Icons.person, size: 30, color: Colors.blue),
+            //       ),
+            //
+            //       SizedBox(height: 10),
+            //
+            //       Text(
+            //         "Coder",
+            //         style: TextStyle(
+            //           color: Colors.white,
+            //           fontSize: 22,
+            //           fontWeight: FontWeight.bold,
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
 
             ListTile(
               leading: const Icon(Icons.home),
@@ -103,40 +108,42 @@ class HomePage extends StatelessWidget {
         ),
       ),
 
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        onTap: (index) {
-
-          if(index == 0){
-            Navigator.pushNamed(context, '/home_page');
-          }
-
-          if(index == 1){
-            Navigator.pushNamed(context, '/');
-          }
-
-          if(index == 2){
-            Navigator.pushNamed(context, '/settings');
-          }
-
-        },
-        items: const[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: "Home",
-
-            ),
-            BottomNavigationBarItem(
-            icon: Icon(Icons.alarm),
-            label: "Alert",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: "Settings",
-          )
-
-        ],
-      ),
+      // bottomNavigationBar: BottomNavigationBar(
+      //   backgroundColor: theme.bgColor,
+      //   unselectedItemColor: Colors.white,
+      //   currentIndex: 0,
+      //   onTap: (index) {
+      //
+      //     if(index == 0){
+      //       Navigator.pushNamed(context, '/home_page');
+      //     }
+      //
+      //     if(index == 1){
+      //       Navigator.pushNamed(context, '/');
+      //     }
+      //
+      //     if(index == 2){
+      //       Navigator.pushNamed(context, '/settings');
+      //     }
+      //
+      //   },
+      //   items: const[
+      //       BottomNavigationBarItem(
+      //         icon: Icon(Icons.home),
+      //         label: "Home",
+      //
+      //       ),
+      //       BottomNavigationBarItem(
+      //       icon: Icon(Icons.alarm),
+      //       label: "Alert",
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.settings),
+      //       label: "Settings",
+      //     )
+      //
+      //   ],
+      // ),
       body:DefaultTextStyle(
           style: TextStyle(color: textColor),
         child: Padding(
@@ -163,18 +170,21 @@ class HomePage extends StatelessWidget {
               child: ListView(
                 children: [
                   contestCard(
+                    textColor,
                     "Codeforces Round 1000",
                     "Starts in 3 hours",
                     "assets/svgs/code-forces.svg",
                     cardColor,
                   ),
                   contestCard(
+                    textColor,
                     "LeetCode Weekly Contest",
                     "Tomorrow 8:00 PM",
                     "assets/svgs/leetcode.svg",
                     cardColor,
                   ),
                   contestCard(
+                    textColor,
                     "CodeChef Starters",
                     "Friday 7:30 PM",
                     "assets/svgs/codechef.svg",
@@ -186,20 +196,21 @@ class HomePage extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/reminders');
-              },
-              child:  Text("Set Reminder"),
-            ),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     Navigator.pushNamed(context, '/reminders');
+            //   },
+            //   child:  Text("Set Reminder"),
+            // ),
           ],
         ),
       ),
       ),
-    );
+    )
+;
   }
 
-  Widget contestCard(String title, String time, String iconPath, Color cardColor) {
+  Widget contestCard(Color textColor,String title, String time, String iconPath, Color cardColor) {
 
     double iconSize = iconPath.contains("codechef") ? 40 : 22;
 
@@ -213,9 +224,18 @@ class HomePage extends StatelessWidget {
           width: iconSize,
           height: iconSize,
         ),
-        title: Text(title),
-        subtitle: Text(time),
-        trailing: const Icon(Icons.notifications_active),
+        title: Text(
+            title,
+            style: TextStyle(color: textColor),
+        ),
+        subtitle: Text(
+            time,
+            style: TextStyle(color: textColor),
+        ),
+        trailing:  Icon(
+            Icons.notifications_active,
+            color:textColor,
+        ),
       ),
     );
   }
