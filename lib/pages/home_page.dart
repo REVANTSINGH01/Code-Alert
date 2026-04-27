@@ -9,6 +9,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme=context.watch<ThemeProvider>();
     Color textColor= theme.bgColor==Colors.black?Colors.white:Colors.black;
+    Color cardColor=theme.bgColor==Colors.black?Colors.grey:Colors.white;
     return Scaffold(
       backgroundColor: theme.bgColor,
       appBar: AppBar(
@@ -165,16 +166,19 @@ class HomePage extends StatelessWidget {
                     "Codeforces Round 1000",
                     "Starts in 3 hours",
                     "assets/svgs/code-forces.svg",
+                    cardColor,
                   ),
                   contestCard(
                     "LeetCode Weekly Contest",
                     "Tomorrow 8:00 PM",
                     "assets/svgs/leetcode.svg",
+                    cardColor,
                   ),
                   contestCard(
                     "CodeChef Starters",
                     "Friday 7:30 PM",
                     "assets/svgs/codechef.svg",
+                    cardColor,
                   ),
                 ],
               ),
@@ -195,11 +199,12 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget contestCard(String title, String time, String iconPath) {
+  Widget contestCard(String title, String time, String iconPath, Color cardColor) {
 
     double iconSize = iconPath.contains("codechef") ? 40 : 22;
 
     return Card(
+      color:cardColor,
       elevation: 3,
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
