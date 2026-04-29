@@ -23,31 +23,31 @@ class HomePage extends StatelessWidget {
       drawer: Drawer(
         child: ListView(
           children: [
-            // DrawerHeader(
-            //   decoration: BoxDecoration(color: Colors.blue),
-            //   child: Column(
-            //     crossAxisAlignment: CrossAxisAlignment.start,
-            //     children: [
-            //
-            //       CircleAvatar(
-            //         radius: 28,
-            //         backgroundColor: Colors.white,
-            //         child: Icon(Icons.person, size: 30, color: Colors.blue),
-            //       ),
-            //
-            //       SizedBox(height: 10),
-            //
-            //       Text(
-            //         "Coder",
-            //         style: TextStyle(
-            //           color: Colors.white,
-            //           fontSize: 22,
-            //           fontWeight: FontWeight.bold,
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // ),
+            DrawerHeader(
+              decoration: BoxDecoration(color: Colors.blue),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Colors.white,
+                    child: Icon(Icons.person, size: 30, color: Colors.blue),
+                  ),
+
+                  SizedBox(height: 10),
+
+                  Text(
+                    "CodeAlert",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
             ListTile(
               leading: const Icon(Icons.home),
