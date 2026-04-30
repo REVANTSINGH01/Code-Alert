@@ -156,17 +156,6 @@ class _SettingsState extends State<Settings>{
                         ],
                       ),
                     ),
-
-                    // RadioListTile<ThemeOption>(
-                    //   title: Text("System Default"),
-                    //   value: ThemeOption.system,
-                    //   groupValue: selectedTheme,
-                    //   onChanged: (val) {
-                    //     setState(() {
-                    //       selectedTheme = val!;
-                    //     });
-                    //   },
-                    // ),
                     Divider(),
                     ListTile(title:Text("Font Size"),subtitle:Text("Select App's font size",style:TextStyle(color:textColor)),
                       trailing:DropdownButton<String>(value:selectFontSize,underline: SizedBox(),
