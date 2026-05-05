@@ -50,7 +50,7 @@
 lib/
  ├── main.dart
  ├──Backend/
- │   ├── main.py
+ │   └── main.py
  │
  ├── pages/
  │   ├── home_page.dart
