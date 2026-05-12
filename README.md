@@ -18,7 +18,7 @@
   Placeholder UI for contest reminders
 
 * ⚙️ **Settings Page**
-  Static settings interface
+  Dynamic settings interface
 
 * 📊 **Platform Icons Integration**
   Supports Codeforces, CodeChef, and LeetCode assets
@@ -49,6 +49,9 @@
 ```text
 lib/
  ├── main.dart
+ ├──Backend/
+ │   └── main.py
+ │
  ├── pages/
  │   ├── home_page.dart
  │   ├── profilepage.dart
