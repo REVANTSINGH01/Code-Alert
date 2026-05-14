@@ -6,6 +6,8 @@ import 'package:my_app/pages/profilepage.dart';
 import 'package:my_app/pages/settings.dart';
 import 'package:my_app/pages/about_app.dart';
 import 'package:my_app/pages/reminders.dart';
+import 'package:my_app/pages/login_page.dart';
+import 'package:my_app/pages/sign_up.dart';
 
 
 void main() {
@@ -23,8 +25,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return  MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomePage(),
+      home: LoginPage(),
       routes: {
+        '/signup': (context) => const SignupPage(),
+        '/login': (context) => const LoginPage(),
         '/home_page': (context) => HomePage(),
         '/profilepage': (context) => ProfilePage(),
         '/settings' : (context) => Settings(),
@@ -42,13 +46,7 @@ class MainPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blue,
-      // appBar: AppBar(
-      //   title: const Text("CodeAlert"),
-      // ),
-      //
-      // body: const Center(
-      //   child: Text("Main Page"),
-      // ),
+
     );
   }
 }
