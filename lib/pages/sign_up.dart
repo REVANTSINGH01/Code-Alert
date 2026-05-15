@@ -33,10 +33,8 @@ class _SignupPageState extends State<SignupPage> {
 
       Navigator.pushReplacementNamed(
         context,
-        '/home_page',
+        '/user_setup',
       );
-      
-      print(user);
 
       ScaffoldMessenger.of(context).showSnackBar(
 
