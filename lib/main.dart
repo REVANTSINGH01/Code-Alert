@@ -9,7 +9,6 @@ import 'package:my_app/pages/reminders.dart';
 import 'package:my_app/pages/login_page.dart';
 import 'package:my_app/pages/sign_up.dart';
 import 'package:my_app/pages/user_setup.dart';
-import 'package:my_app/pages/platform_detail.dart';
 
 void main() {
   runApp(
@@ -28,7 +27,6 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: LoginPage(),
       routes: {
-        '/platform_detail': (context) => const PlatformDetail(),
         '/signup': (context) => const SignupPage(),
         '/login': (context) => const LoginPage(),
         '/user_setup': (context) => const UserSetup(),

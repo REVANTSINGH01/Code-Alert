@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_app/pages/platform_detail.dart';
 
 class UserSetup extends StatefulWidget {
   const UserSetup({super.key});
@@ -82,6 +83,11 @@ class _UserState extends State<UserSetup>{
                 ),
                 onPressed:selectedPlatforms.isEmpty ?null
                     :() {
+                  Navigator.push(context, MaterialPageRoute(builder: (_)=>PlatformDetail(
+                    selectedPlatforms: selectedPlatforms,
+                       ),
+                    ),
+                  );
                   print(selectedPlatforms);
                 },
                 child: const Text("Continue"),

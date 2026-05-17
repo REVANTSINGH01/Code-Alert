@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 class ApiService {
 
   // Android Emulator URL
-  static const String baseUrl = "http://192.168.52.165:8000";
+  static const String baseUrl = "http://192.168.1.158:8000";
 
   // For Physical Device:
   // static const String baseUrl = "http://192.168.X.X:8000";
