@@ -1,14 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../provider/theme_provider.dart';
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
-
+  @override
+  State<ProfilePage> createState() => _ProfilePage();
+}
+class _ProfilePage extends State<ProfilePage>{
+  String username="";
+  @override
+  void initState(){
+    super.initState();
+    loadUserData();
+  }
+  Future<void> loadUserData()
+  async {
+    final prefs =await SharedPreferences.getInstance();
+    setState((){
+      username = prefs.getString("username") ?? "User";
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>();
 
-    // 🎨 Dynamic colors
     theme.bgColor == Colors.black ? Colors.white : Colors.black;
     Color textColor=theme.bgColor==const Color(0xFF121212)?Colors.white:Colors.black;
     Color bgColor=theme.bgColor==const Color(0xFF121212)?const Color(0xFF1E1E1E):Colors.white;
@@ -33,8 +49,8 @@ class ProfilePage extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-             Text(
-              "Revant Singh",
+            Text(
+              "$username",
               style: TextStyle(color: textColor,fontSize: 22, fontWeight: FontWeight.bold),
             ),
 

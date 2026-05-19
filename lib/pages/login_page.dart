@@ -31,9 +31,18 @@ class _LoginPageState extends State<LoginPage> {
       final prefs = await SharedPreferences.getInstance();
 
       await prefs.setString(
-        "user_id",
-        user["id"],
+        "token",
+        user["access_token"],
       );
+      await prefs.setString(
+        "user_id",
+        user["user"]["id"],
+      );
+      await prefs.setString(
+        "username",
+        user["user"]["name"],
+      );
+      print(user);
       Navigator.pushReplacementNamed(
         context,
         '/home_page',

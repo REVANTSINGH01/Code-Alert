@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
 
   // Android Emulator URL
-  static const String baseUrl = "http://192.168.1.158:8000";
+  static const String baseUrl = "http://192.168.46.105:8000";
 
   // For Physical Device:
   // static const String baseUrl = "http://192.168.X.X:8000";
@@ -77,6 +78,10 @@ class ApiService {
   // GET CONTESTS
   // =========================
 
+  static Future<String?> getToken() async{
+    final prefs=await SharedPreferences.getInstance();
+    return prefs.getString("token");
+  }
   static Future<List<dynamic>> getContests() async {
 
     final response = await http.get(

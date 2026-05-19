@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'provider/theme_provider.dart';
 import 'package:my_app/pages/home_page.dart';
 import 'package:my_app/pages/profilepage.dart';
@@ -10,22 +11,35 @@ import 'package:my_app/pages/login_page.dart';
 import 'package:my_app/pages/sign_up.dart';
 import 'package:my_app/pages/user_setup.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs=await SharedPreferences.getInstance();
+  String? token=prefs.getString("token");
+  Widget startPage;
+  if (token != null) {
+    startPage = HomePage();
+  } else {
+    startPage = LoginPage();
+  }
+
   runApp(
     ChangeNotifierProvider(create: (_)=>ThemeProvider(),
-      child: const MyApp(),
+      child: MyApp(
+        startPage:startPage,
+      ),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Widget startPage;
+  const MyApp({super.key,required this.startPage});
 
   @override
   Widget build(BuildContext context) {
     return  MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      home: startPage,
       routes: {
         '/signup': (context) => const SignupPage(),
         '/login': (context) => const LoginPage(),
