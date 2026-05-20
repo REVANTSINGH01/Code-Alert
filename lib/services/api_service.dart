@@ -7,12 +7,6 @@ class ApiService {
   // Android Emulator URL
   static const String baseUrl = "http://192.168.46.105:8000";
 
-  // For Physical Device:
-  // static const String baseUrl = "http://192.168.X.X:8000";
-
-  // =========================
-  // SIGNUP
-  // =========================
 
   static Future<Map<String, dynamic>> signup({
     required String name,
