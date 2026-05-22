@@ -13,8 +13,7 @@ class ProfilePage extends StatefulWidget {
       _ProfilePage();
 }
 
-class _ProfilePage
-    extends State<ProfilePage> {
+class _ProfilePage extends State<ProfilePage> {
 
   String username = "User";
 
@@ -22,323 +21,323 @@ class _ProfilePage
 
   int? cfRating;
 
-  int reminders = 0;
-
   bool loading = true;
 
   @override
   void initState() {
     super.initState();
 
-    loadUserData();
+    loadUser();
   }
 
-  Future<void> loadUserData()
-  async {
+  Future<void> loadUser() async {
 
     try {
 
       final prefs =
-      await SharedPreferences
-          .getInstance();
+      await SharedPreferences.getInstance();
 
-      username =
-          prefs.getString(
-              "username") ??
-              "User";
+      final dashboard =
+      await ApiService.syncDashboard();
+
+      if (!mounted) return;
+
+      setState(() {
+
+        username =
+            prefs.getString(
+                "username"
+            ) ??
+                "User";
+
+        if (
+        dashboard["leetcode"]
+            !=
+            null
+        ) {
+          lcRating =
+              (
+                  dashboard[
+                  "leetcode"
+                  ]["rating"]
+                  as num
+              )
+                  .toDouble();
+        }
+
+        if (
+        dashboard["codeforces"]
+            !=
+            null
+        ) {
+          cfRating =
+              (
+                  dashboard[
+                  "codeforces"
+                  ]["rating"]
+                  as num
+              )
+                  .toInt();
+        }
+
+        loading = false;
+
+      });
+
+    }
+
+    catch (e) {
+
+      print(e);
+
+      if (!mounted)
+        return;
+
+      setState(() {
+
+        loading = false;
+
+      });
+
+    }
+
+  }
+
+  Widget profileCard({
+
+    required IconData icon,
+
+    required String title,
+
+    required String value,
+
+    required Color textColor,
+
+    required Color cardColor,
+
+  }) {
+
+    return Card(
+
+      color: cardColor,
+
+      child: ListTile(
+
+        leading: Icon(
+          icon,
+          color: textColor,
+        ),
+
+        title: Text(
+          title,
+          style: TextStyle(
+            color: textColor,
+          ),
+        ),
+
+        trailing: Text(
+          value,
+          style: TextStyle(
+            color: textColor,
+          ),
+        ),
+
+      ),
+
+    );
+
   }
 
   @override
-  Widget build(
-      BuildContext context) {
+  Widget build(BuildContext context) {
 
     final theme =
-    context.watch<
-        ThemeProvider>();
+    context.watch<ThemeProvider>();
 
     Color textColor =
     theme.bgColor ==
         const Color(
-            0xFF121212)
-        ? Colors.white
-        : Colors.black;
+            0xFF121212
+        )
+        ?
+    Colors.white
+        :
+    Colors.black;
 
     Color cardColor =
     theme.bgColor ==
         const Color(
-            0xFF121212)
-        ? const Color(
-        0xFF1E1E1E)
-        : Colors.white;
+            0xFF121212
+        )
+        ?
+    const Color(
+        0xFF1E1E1E
+    )
+        :
+    Colors.white;
 
     return Scaffold(
 
       backgroundColor:
       theme.bgColor,
 
-      appBar: AppBar(
+      appBar:
+
+      AppBar(
 
         backgroundColor:
         theme.bgColor,
 
-        iconTheme:
-        IconThemeData(
-            color:
-            textColor),
+        title:
 
-        title: Text(
+        Text(
 
           "Profile",
 
-          style: TextStyle(
-              color:
-              textColor),
+          style:
+
+          TextStyle(
+            color:
+            textColor,
+          ),
+
         ),
+
       ),
 
       body:
+
       loading
 
-          ? const Center(
+          ?
+
+      const Center(
 
         child:
         CircularProgressIndicator(),
+
       )
 
-          : Padding(
+          :
+
+      Padding(
 
         padding:
-        const EdgeInsets
-            .all(
-            16),
+        const EdgeInsets.all(
+            20
+        ),
 
         child:
+
         Column(
 
           children: [
 
             const CircleAvatar(
-
-              radius:
-              50,
-
-              child:
-              Icon(
-                Icons
-                    .person,
-
-                size:
-                50,
+              radius: 50,
+              child: Icon(
+                Icons.person,
+                size: 50,
               ),
             ),
 
             const SizedBox(
-                height:
-                10),
+                height: 15
+            ),
 
             Text(
 
               username,
 
               style:
+
               TextStyle(
 
                 color:
                 textColor,
 
                 fontSize:
-                22,
+                24,
 
                 fontWeight:
-                FontWeight
-                    .bold,
+                FontWeight.bold,
+
               ),
-            ),
 
-            Text(
-
-              "Competitive Programmer",
-
-              style:
-              TextStyle(
-                color:
-                textColor,
-              ),
             ),
 
             const SizedBox(
-                height:
-                20),
-
-            Card(
-
-              color:
-              cardColor,
-
-              child:
-              ListTile(
-
-                leading:
-                Icon(
-
-                  Icons
-                      .code,
-
-                  color:
-                  textColor,
-                ),
-
-                title:
-                Text(
-
-                  "LeetCode Rating",
-
-                  style:
-                  TextStyle(
-                    color:
-                    textColor,
-                  ),
-                ),
-
-                trailing:
-                Text(
-
-                  lcRating
-                      ?.toString() ??
-                      "--",
-
-                  style:
-                  TextStyle(
-                    color:
-                    textColor,
-                  ),
-                ),
-              ),
+                height: 20
             ),
 
-            Card(
+            profileCard(
 
-              color:
+              icon:
+              Icons.code,
+
+              title:
+              "LeetCode Rating",
+
+              value:
+              lcRating
+                  ?.toStringAsFixed(2)
+                  ??
+                  "--",
+
+              textColor:
+              textColor,
+
+              cardColor:
               cardColor,
 
-              child:
-              ListTile(
-
-                leading:
-                Icon(
-
-                  Icons
-                      .star,
-
-                  color:
-                  textColor,
-                ),
-
-                title:
-                Text(
-
-                  "Codeforces Rating",
-
-                  style:
-                  TextStyle(
-                    color:
-                    textColor,
-                  ),
-                ),
-
-                trailing:
-                Text(
-
-                  cfRating
-                      ?.toString() ??
-                      "--",
-
-                  style:
-                  TextStyle(
-                    color:
-                    textColor,
-                  ),
-                ),
-              ),
             ),
 
-            Card(
+            profileCard(
 
-              color:
+              icon:
+              Icons.star,
+
+              title:
+              "Codeforces Rating",
+
+              value:
+              cfRating
+                  ?.toString()
+                  ??
+                  "--",
+
+              textColor:
+              textColor,
+
+              cardColor:
               cardColor,
 
-              child:
-              ListTile(
-
-                leading:
-                Icon(
-
-                  Icons
-                      .notifications,
-
-                  color:
-                  textColor,
-                ),
-
-                title:
-                Text(
-
-                  "Active Reminders",
-
-                  style:
-                  TextStyle(
-                    color:
-                    textColor,
-                  ),
-                ),
-
-                trailing:
-                Text(
-
-                  reminders
-                      .toString(),
-
-                  style:
-                  TextStyle(
-                    color:
-                    textColor,
-                  ),
-                ),
-              ),
             ),
 
             const SizedBox(
-                height:
-                20),
+                height: 20
+            ),
 
             ElevatedButton(
 
-              style:
-              ElevatedButton
-                  .styleFrom(
-
-                backgroundColor:
-                cardColor,
-              ),
-
               onPressed:
-                  () {},
+              loadUser,
 
               child:
-              Text(
-
-                "Edit Profile",
-
-                style:
-                TextStyle(
-                  color:
-                  textColor,
-                ),
+              const Text(
+                  "Refresh"
               ),
-            ),
+
+            )
+
           ],
+
         ),
+
       ),
+
     );
+
   }
+
 }

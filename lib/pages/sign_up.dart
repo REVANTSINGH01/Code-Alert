@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 
 class SignupPage extends StatefulWidget {
@@ -18,9 +19,11 @@ class _SignupPageState extends State<SignupPage> {
 
   Future<void> signup() async {
 
-    setState(() {
-      isLoading = true;
-    });
+    if(mounted){
+      setState(() {
+        isLoading = true;
+      });
+    }
 
     try {
 
@@ -30,17 +33,16 @@ class _SignupPageState extends State<SignupPage> {
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
+      print(user);
+      final prefs=await SharedPreferences.getInstance();
+
+      await prefs.setString("token", user["access_token"]);
+      await prefs.setString("user_id", user["user"]["id"]);
+      await prefs.setString("username", user["user"]["name"]);
 
       Navigator.pushReplacementNamed(
         context,
         '/user_setup',
-      );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-
-        const SnackBar(
-          content: Text("Signup Successful"),
-        ),
       );
 
     } catch (e) {

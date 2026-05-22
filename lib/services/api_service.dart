@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiService {
 
   // Android Emulator URL
-  static const String baseUrl = "http://192.168.46.105:8000";
+  static const String baseUrl = "http://192.168.45.182:8000";
 
 
   static Future<Map<String, dynamic>> signup({
@@ -31,6 +31,22 @@ class ApiService {
     final data = jsonDecode(response.body);
 
     if (response.statusCode == 201) {
+
+      final prefs =
+      await SharedPreferences
+          .getInstance();
+      await prefs.setString(
+        "token",
+        data["access_token"],
+      );
+      await prefs.setString(
+        "user_id",
+        data["user"]["id"],
+      );
+      await prefs.setString(
+        "username",
+        data["user"]["name"],
+      );
       return data;
     } else {
       throw Exception(data["detail"]);
@@ -48,20 +64,31 @@ class ApiService {
 
     final response = await http.post(
       Uri.parse("$baseUrl/login"),
-
       headers: {
         "Content-Type": "application/json",
       },
-
       body: jsonEncode({
         "email": email,
         "password": password,
       }),
     );
-
     final data = jsonDecode(response.body);
-
     if (response.statusCode == 200) {
+      final prefs =
+      await SharedPreferences
+          .getInstance();
+      await prefs.setString(
+        "token",
+        data["access_token"],
+      );
+      await prefs.setString(
+        "user_id",
+        data["user"]["id"],
+      );
+      await prefs.setString(
+        "username",
+        data["user"]["name"],
+      );
       return data;
     } else {
       throw Exception(data["detail"]);
@@ -72,67 +99,98 @@ class ApiService {
   // GET CONTESTS
   // =========================
 
-  static Future<String?> getToken() async{
-    final prefs=await SharedPreferences.getInstance();
-    return prefs.getString("token");
-  }
-  static Future<List<dynamic>> getContests() async {
-
-    final response = await http.get(
+  static Future<List<dynamic>>
+  getContests()
+  async {
+    final response =
+    await http.get(
       Uri.parse("$baseUrl/contests"),
     );
-
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception("Failed to load contests");
+    if(response.statusCode == 200){
+      return jsonDecode(
+          response.body
+      );
     }
+    throw Exception(
+        "Failed to load contests"
+    );
+
   }
 
   // =========================
   // UPDATE HANDLES
   // =========================
 
-  static Future<Map<String, dynamic>> updateHandles({
-    required String userId,
-    String? cfHandle,
-    String? lcHandle,
-    String? ccHandle,
-  }) async {
-
+  static Future<Map<String,dynamic>> updateHandles({String? cfHandle, String? lcHandle, String? ccHandle,}) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? token =
+    prefs.getString(
+        "token"
+    );
+    if(token == null){
+      throw Exception(
+          "Login required"
+      );
+    }
+    Map<String,dynamic>
+    body = {};
+    if(cfHandle != null && cfHandle.isNotEmpty){
+      body["cf_handle"] =
+          cfHandle;
+    }
+    if(lcHandle != null && lcHandle.isNotEmpty){
+      body["lc_handle"] = lcHandle;
+    }
+    if(
+    ccHandle != null && ccHandle.isNotEmpty){
+      body["cc_handle"]=ccHandle;
+    }
     final response = await http.put(
-      Uri.parse("$baseUrl/users/$userId/handles"),
-
-      headers: {
-        "Content-Type": "application/json",
+      Uri.parse("$baseUrl/users/handles"),
+      headers:{
+        "Content-Type":
+        "application/json",
+        "Authorization":
+        "Bearer $token"
       },
+      body:
 
-      body: jsonEncode({
-        "cf_handle": cfHandle,
-        "lc_handle": lcHandle,
-        "cc_handle": ccHandle,
-      }),
+      jsonEncode(
+          body
+      ),
+
     );
 
-    final data = jsonDecode(response.body);
+    final data =
 
-    if (response.statusCode == 200) {
+    jsonDecode(
+        response.body
+    );
+
+    print(data);
+
+    if(
+    response.statusCode
+        ==
+        200
+    ){
+
       return data;
-    } else {
-      throw Exception(data["detail"]);
+
     }
+
+    throw Exception(
+        data["detail"]
+    );
   }
 
   // =========================
   // GET REMINDERS
   // =========================
 
-  static Future<List<dynamic>> getReminders(
-      String userId,
-      ) async {
-
+  static Future<List<dynamic>> getReminders() async {
     final response = await http.get(
-      Uri.parse("$baseUrl/reminders/$userId"),
+      Uri.parse("$baseUrl/reminders/"),
     );
 
     if (response.statusCode == 200) {
@@ -179,21 +237,53 @@ class ApiService {
   // =========================
   // DASHBOARD SYNC
   // =========================
+  static Future<Map<String,dynamic>>
+  syncDashboard()
+  async {
 
-  static Future<Map<String, dynamic>> syncDashboard(
-      String userId,
-      ) async {
+    final prefs =
+    await SharedPreferences
+        .getInstance();
 
-    final response = await http.post(
-      Uri.parse("$baseUrl/dashboard/sync/$userId"),
+    String? token =prefs.getString("token");
+    print(token);
+    if(token==null) {
+      throw Exception(
+        "Login Reuqired"
+      );
+    }
+    final response =
+    await http.post(
+        Uri.parse(
+            "$baseUrl/dashboard/sync/"
+        ),
+        headers:{
+
+          "Authorization":
+          "Bearer $token"
+        }
+    );
+    print(response.statusCode);
+    print(response.body);
+
+    final data =
+    jsonDecode(
+        response.body
     );
 
-    final data = jsonDecode(response.body);
+    if(
+    response.statusCode
+        ==
+        200
+    ){
 
-    if (response.statusCode == 200) {
       return data;
-    } else {
-      throw Exception(data["detail"]);
+
     }
+
+    throw Exception(
+        data["detail"]
+    );
   }
+  
 }

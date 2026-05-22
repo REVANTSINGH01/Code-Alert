@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 class PlatformDetail extends StatefulWidget{
   final List<String> selectedPlatforms;
@@ -28,20 +27,13 @@ class _PlatformDetail extends State<PlatformDetail>{
     });
 
     try {
-      final prefs =
-      await SharedPreferences.getInstance();
-
-      String? userId =
-      prefs.getString("user_id");
-
-      if (userId == null) {
-        throw Exception("User not found");
+      if(cfController.text.trim().isEmpty && lcController.text.trim().isEmpty && ccController.text.trim().isEmpty){
+        throw Exception(
+            "Enter at least one handle"
+        );
       }
 
       await ApiService.updateHandles(
-
-        userId: userId,
-
         cfHandle:
         cfController.text.trim(),
 
@@ -51,7 +43,7 @@ class _PlatformDetail extends State<PlatformDetail>{
         ccHandle:
         ccController.text.trim(),
       );
-
+      await ApiService.syncDashboard();
       if (!mounted) return;
 
       ScaffoldMessenger.of(context)
@@ -91,17 +83,25 @@ class _PlatformDetail extends State<PlatformDetail>{
   }
 
   @override
-  Widget build(BuildContext context) {
+  void dispose() {
+    cfController.dispose();
+    lcController.dispose();
+    ccController.dispose();
+    super.dispose();
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    print(widget.selectedPlatforms);
     return Scaffold(
 
       appBar: AppBar(
         title:
         const Text("Platform Handles"),
+
       ),
 
       body: Padding(
-
         padding:
         const EdgeInsets.all(20),
 
@@ -109,83 +109,75 @@ class _PlatformDetail extends State<PlatformDetail>{
 
           child: Column(
 
-            children: [
+              children: [
 
-              if (widget.selectedPlatforms
-                  .contains("codeforces"))
+                if(widget.selectedPlatforms
+                    .map((e)=>e.toLowerCase())
+                    .contains("codeforces"))
 
-                TextField(
-
-                  controller:
-                  cfController,
-
-                  decoration:
-                  const InputDecoration(
-
-                    labelText:
-                    "Codeforces Handle",
+                  TextField(
+                    controller: cfController,
+                    decoration: const InputDecoration(
+                      labelText: "Codeforces Handle",
+                    ),
                   ),
-                ),
 
-              const SizedBox(height: 20),
+                const SizedBox(height:20),
 
-              if (widget.selectedPlatforms
-                  .contains("leetcode"))
+                if(widget.selectedPlatforms
+                    .map((e)=>e.toLowerCase())
+                    .contains("leetcode"))
 
-                TextField(
-
-                  controller:
-                  lcController,
-
-                  decoration:
-                  const InputDecoration(
-
-                    labelText:
-                    "LeetCode Handle",
+                  TextField(
+                    controller: lcController,
+                    decoration: const InputDecoration(
+                      labelText: "LeetCode Handle",
+                    ),
                   ),
-                ),
 
-              const SizedBox(height: 20),
+                const SizedBox(height:20),
 
-              if (widget.selectedPlatforms
-                  .contains("codechef"))
+                if(widget.selectedPlatforms
+                    .map((e)=>e.toLowerCase())
+                    .contains("codechef"))
 
-                TextField(
-
-                  controller:
-                  ccController,
-
-                  decoration:
-                  const InputDecoration(
-
-                    labelText:
-                    "CodeChef Handle",
+                  TextField(
+                    controller: ccController,
+                    decoration: const InputDecoration(
+                      labelText: "CodeChef Handle",
+                    ),
                   ),
-                ),
 
-              const SizedBox(height: 40),
+                const SizedBox(height:40),
 
-              SizedBox(
+                SizedBox(
+                  width: double.infinity,
 
-                width: double.infinity,
+                  child: ElevatedButton(
 
-                child: ElevatedButton(
+                    onPressed:
+                    isLoading
+                        ? null
+                        : saveHandles,
 
-                  onPressed:
-                  isLoading
-                      ? null
-                      : saveHandles,
+                    child:
 
-                  child: isLoading
+                    isLoading
 
-                      ? const CircularProgressIndicator()
+                        ?
 
-                      : const Text(
-                    "Continue",
+                    const CircularProgressIndicator()
+
+                        :
+
+                    const Text(
+                      "Continue",
+                    ),
+
                   ),
+
                 ),
-              ),
-            ],
+              ]
           ),
         ),
       ),

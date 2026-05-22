@@ -81,14 +81,20 @@ class _UserState extends State<UserSetup>{
                     vertical: 16,
                   ),
                 ),
-                onPressed:selectedPlatforms.isEmpty ?null
-                    :() {
-                  Navigator.push(context, MaterialPageRoute(builder: (_)=>PlatformDetail(
-                    selectedPlatforms: selectedPlatforms,
-                       ),
+                onPressed: selectedPlatforms.isEmpty
+                    ? null
+                    : () {
+
+                  print(selectedPlatforms);
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PlatformDetail(
+                        selectedPlatforms: List.from(selectedPlatforms),
+                      ),
                     ),
                   );
-                  print(selectedPlatforms);
                 },
                 child: const Text("Continue"),
               ),

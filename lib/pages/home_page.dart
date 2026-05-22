@@ -3,6 +3,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../provider/theme_provider.dart';
+import '../services/api_service.dart';
+import 'dart:async';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
   @override
@@ -10,26 +13,83 @@ class HomePage extends StatefulWidget {
       _HomePageState();
 }
   class _HomePageState extends State<HomePage>{
+    Timer? timer;
     String username="";
+    List contests = [];
+    bool contestsLoading = true;
     @override
     void initState() {
-
       super.initState();
-
-      loadUserData();
+      initialize();
+      timer =
+          Timer.periodic(
+            const Duration(seconds:1), (_){
+              if(mounted){
+                setState(() {});
+              }
+            },
+          );
+    }
+    Future<void> initialize() async {
+      await loadUserData();
+      await loadContests();
     }
     Future<void> loadUserData()
     async {
       final prefs =await SharedPreferences.getInstance();
+      if(!mounted)return;
       setState((){
         username = prefs.getString("username") ?? "User";
       });
     }
+
+    Future<void> loadContests()
+    async {
+      try{
+        final data =
+        await ApiService
+            .getContests()
+            .timeout(
+          const Duration(
+              seconds: 8
+          ),
+
+        );
+        print(data);
+        if(!mounted)
+          return;
+
+        setState(() {
+
+          contests =
+              data;
+
+          contestsLoading =
+          false;
+
+        });
+
+      }
+      catch(e){
+        print(
+            "Contest Error:"
+        );
+        print(e);
+        if(!mounted)
+          return;
+        setState(() {
+          contests = [];
+          contestsLoading =
+          false;
+
+        });
+      }
+    }
+
     Future<void> logout(BuildContext context)async{
       final prefs=await SharedPreferences.getInstance();
-      prefs.remove("token");
-      prefs.remove("user_id");
-      await prefs.remove("username");
+      await prefs.clear();
+      if(!mounted)return ;
       Navigator.pushNamedAndRemoveUntil(context, '/login',(route)=>false,);
     }
     @override
@@ -194,31 +254,56 @@ class HomePage extends StatefulWidget {
                 const SizedBox(height: 15),
 
                 Expanded(
-                  child: ListView(
-                    children: [
-                      contestCard(
+
+                  child:
+
+                  contestsLoading
+
+                      ?
+
+                  const Center(
+
+                    child:
+                    CircularProgressIndicator(),
+
+                  )
+
+                      :
+
+                  ListView.builder(
+
+                    itemCount:
+                    contests.length,
+
+                    itemBuilder:
+                        (
+                        context,
+                        index
+                        ){
+
+                      final contest =
+                      contests[index];
+
+                      return contestCard(
+
                         textColor,
-                        "Codeforces Round 1000",
-                        "Starts in 3 hours",
-                        "assets/svgs/code-forces.svg",
+
+                        contest["name"],
+
+                        contest["start_time"],
+
+                        getIcon(
+                            contest["platform"]
+                        ),
+
                         cardColor,
-                      ),
-                      contestCard(
-                        textColor,
-                        "LeetCode Weekly Contest",
-                        "Tomorrow 8:00 PM",
-                        "assets/svgs/leetcode.svg",
-                        cardColor,
-                      ),
-                      contestCard(
-                        textColor,
-                        "CodeChef Starters",
-                        "Friday 7:30 PM",
-                        "assets/svgs/codechef.svg",
-                        cardColor,
-                      ),
-                    ],
+
+                      );
+
+                    },
+
                   ),
+
                 ),
 
                 const SizedBox(height: 10),
@@ -236,35 +321,190 @@ class HomePage extends StatefulWidget {
       )
       ;
     }
+    @override
+    void dispose(){
 
-    Widget contestCard(Color textColor,String title, String time, String iconPath, Color cardColor) {
+      timer?.cancel();
 
-      double iconSize = iconPath.contains("codechef") ? 40 : 22;
+      super.dispose();
+
+    }
+
+    Widget contestCard(
+
+        Color textColor,
+
+        String title,
+
+        String time,
+
+        String iconPath,
+
+        Color cardColor
+
+        ){
+
+      double iconSize =
+
+      iconPath.contains(
+          "codechef"
+      )
+
+          ?
+
+      40
+
+          :
+
+      22;
+
+      DateTime start =
+
+      DateTime.parse(
+          time
+      );
+
+      Duration diff =
+
+      start.difference(
+          DateTime.now()
+      );
+
+      String countdown;
+
+      if(
+      diff.isNegative
+      ){
+
+        countdown =
+        "Started";
+
+      }
+
+      else{
+
+        int days =
+            diff.inDays;
+
+        int hours =
+            diff.inHours % 24;
+
+        int minutes =
+            diff.inMinutes % 60;
+
+        int seconds =
+            diff.inSeconds % 60;
+
+        countdown =
+
+        "${days}d : "
+
+            "${hours.toString().padLeft(2,'0')}h : "
+
+            "${minutes.toString().padLeft(2,'0')}m : "
+
+            "${seconds.toString().padLeft(2,'0')}s";
+
+      }
 
       return Card(
-        color:cardColor,
-        elevation: 3,
-        margin: const EdgeInsets.only(bottom: 10),
-        child: ListTile(
-          leading: SvgPicture.asset(
-            iconPath,
-            width: iconSize,
-            height: iconSize,
-          ),
-          title: Text(
-            title,
-            style: TextStyle(color: textColor),
-          ),
-          subtitle: Text(
-            time,
-            style: TextStyle(color: textColor),
-          ),
-          trailing:  Icon(
-            Icons.notifications_active,
-            color:textColor,
-          ),
+
+        color:
+        cardColor,
+
+        margin:
+
+        const EdgeInsets.only(
+            bottom:10
         ),
+
+        child:
+
+        ListTile(
+
+          leading:
+
+          SvgPicture.asset(
+
+            iconPath,
+
+            width:
+            iconSize,
+
+            height:
+            iconSize,
+
+          ),
+
+          title:
+
+          Text(
+
+            title,
+
+            style:
+
+            TextStyle(
+              color:
+              textColor,
+            ),
+
+          ),
+
+          subtitle:
+
+          Text(
+
+            countdown,
+
+            style:
+
+            TextStyle(
+              color:
+              textColor,
+            ),
+
+          ),
+
+          trailing:
+
+          Icon(
+
+            Icons
+                .notifications_active,
+
+            color:
+            textColor,
+
+          ),
+
+        ),
+
       );
+
+    }
+    String getIcon(String platform){
+
+      switch(platform){
+
+        case "Codeforces":
+          return
+            "assets/svgs/code-forces.svg";
+
+        case "LeetCode":
+          return
+            "assets/svgs/leetcode.svg";
+
+        case "CodeChef":
+          return
+            "assets/svgs/codechef.svg";
+
+        default:
+          return
+            "assets/svgs/code-forces.svg";
+
+      }
+
     }
 
 }
