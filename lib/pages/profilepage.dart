@@ -1,7 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../provider/theme_provider.dart';
 import '../services/api_service.dart';
 
@@ -9,8 +9,7 @@ class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() =>
-      _ProfilePage();
+  State<ProfilePage> createState() => _ProfilePage();
 }
 
 class _ProfilePage extends State<ProfilePage> {
@@ -23,16 +22,35 @@ class _ProfilePage extends State<ProfilePage> {
 
   bool loading = true;
 
+  Timer? syncTimer;
+
   @override
   void initState() {
     super.initState();
 
     loadUser();
+
+    syncTimer = Timer.periodic(
+      const Duration(minutes: 5),
+          (_) {
+        if (mounted) {
+          loadUser(showLoader: false);
+        }
+      },
+    );
   }
 
-  Future<void> loadUser() async {
+  Future<void> loadUser({
+    bool showLoader = true,
+  }) async {
 
     try {
+
+      if (showLoader && mounted) {
+        setState(() {
+          loading = true;
+        });
+      }
 
       final prefs =
       await SharedPreferences.getInstance();
@@ -45,58 +63,42 @@ class _ProfilePage extends State<ProfilePage> {
       setState(() {
 
         username =
-            prefs.getString(
-                "username"
-            ) ??
+            prefs.getString("username")
+                ??
                 "User";
 
-        if (
-        dashboard["leetcode"]
-            !=
-            null
-        ) {
-          lcRating =
-              (
-                  dashboard[
-                  "leetcode"
-                  ]["rating"]
-                  as num
-              )
-                  .toDouble();
-        }
+        lcRating =
+        dashboard["leetcode"] != null
+            ?
+        double.tryParse(
+          dashboard["leetcode"]["rating"]
+              .toString(),
+        )
+            :
+        null;
 
-        if (
-        dashboard["codeforces"]
-            !=
-            null
-        ) {
-          cfRating =
-              (
-                  dashboard[
-                  "codeforces"
-                  ]["rating"]
-                  as num
-              )
-                  .toInt();
-        }
+        cfRating =
+        dashboard["codeforces"] != null
+            ?
+        int.tryParse(
+          dashboard["codeforces"]["rating"]
+              .toString(),
+        )
+            :
+        null;
 
         loading = false;
 
       });
 
-    }
-
-    catch (e) {
+    } catch (e) {
 
       print(e);
 
-      if (!mounted)
-        return;
+      if (!mounted) return;
 
       setState(() {
-
         loading = false;
-
       });
 
     }
@@ -104,17 +106,11 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   Widget profileCard({
-
     required IconData icon,
-
     required String title,
-
     required String value,
-
     required Color textColor,
-
     required Color cardColor,
-
   }) {
 
     return Card(
@@ -149,6 +145,15 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   @override
+  void dispose() {
+
+    syncTimer?.cancel();
+
+    super.dispose();
+
+  }
+
+  @override
   Widget build(BuildContext context) {
 
     final theme =
@@ -156,9 +161,7 @@ class _ProfilePage extends State<ProfilePage> {
 
     Color textColor =
     theme.bgColor ==
-        const Color(
-            0xFF121212
-        )
+        const Color(0xFF121212)
         ?
     Colors.white
         :
@@ -166,41 +169,25 @@ class _ProfilePage extends State<ProfilePage> {
 
     Color cardColor =
     theme.bgColor ==
-        const Color(
-            0xFF121212
-        )
+        const Color(0xFF121212)
         ?
-    const Color(
-        0xFF1E1E1E
-    )
+    const Color(0xFF1E1E1E)
         :
     Colors.white;
 
     return Scaffold(
 
-      backgroundColor:
-      theme.bgColor,
+      backgroundColor: theme.bgColor,
 
-      appBar:
+      appBar: AppBar(
 
-      AppBar(
+        backgroundColor: theme.bgColor,
 
-        backgroundColor:
-        theme.bgColor,
-
-        title:
-
-        Text(
-
+        title: Text(
           "Profile",
-
-          style:
-
-          TextStyle(
-            color:
-            textColor,
+          style: TextStyle(
+            color: textColor,
           ),
-
         ),
 
       ),
@@ -212,132 +199,117 @@ class _ProfilePage extends State<ProfilePage> {
           ?
 
       const Center(
-
         child:
         CircularProgressIndicator(),
-
       )
 
           :
 
-      Padding(
+      RefreshIndicator(
 
-        padding:
-        const EdgeInsets.all(
-            20
-        ),
+        onRefresh: () async {
+          await loadUser();
+        },
 
-        child:
+        child: SingleChildScrollView(
 
-        Column(
+          physics:
+          const AlwaysScrollableScrollPhysics(),
 
-          children: [
+          padding:
+          const EdgeInsets.all(20),
 
-            const CircleAvatar(
-              radius: 50,
-              child: Icon(
-                Icons.person,
-                size: 50,
+          child: Column(
+
+            children: [
+
+              const CircleAvatar(
+                radius: 50,
+                child: Icon(
+                  Icons.person,
+                  size: 50,
+                ),
               ),
-            ),
 
-            const SizedBox(
-                height: 15
-            ),
+              const SizedBox(
+                height: 15,
+              ),
 
-            Text(
+              Text(
 
-              username,
+                username,
 
-              style:
+                style: TextStyle(
 
-              TextStyle(
+                  color: textColor,
 
-                color:
+                  fontSize: 24,
+
+                  fontWeight:
+                  FontWeight.bold,
+
+                ),
+
+              ),
+
+              const SizedBox(
+                height: 20,
+              ),
+
+              profileCard(
+
+                icon:
+                Icons.code,
+
+                title:
+                "LeetCode Rating",
+
+                value:
+                lcRating
+                    ?.toStringAsFixed(2)
+                    ??
+                    "--",
+
+                textColor:
                 textColor,
 
-                fontSize:
-                24,
-
-                fontWeight:
-                FontWeight.bold,
+                cardColor:
+                cardColor,
 
               ),
+              profileCard(
 
-            ),
-
-            const SizedBox(
-                height: 20
-            ),
-
-            profileCard(
-
-              icon:
-              Icons.code,
-
-              title:
-              "LeetCode Rating",
-
-              value:
-              lcRating
-                  ?.toStringAsFixed(2)
-                  ??
-                  "--",
-
-              textColor:
-              textColor,
-
-              cardColor:
-              cardColor,
-
-            ),
-
-            profileCard(
-
-              icon:
-              Icons.star,
-
-              title:
-              "Codeforces Rating",
-
-              value:
-              cfRating
-                  ?.toString()
-                  ??
-                  "--",
-
-              textColor:
-              textColor,
-
-              cardColor:
-              cardColor,
-
-            ),
-
-            const SizedBox(
-                height: 20
-            ),
-
-            ElevatedButton(
-
-              onPressed:
-              loadUser,
-
-              child:
-              const Text(
-                  "Refresh"
+                icon:
+                Icons.star,
+                title:
+                "Codeforces Rating",
+                value:
+                cfRating
+                    ?.toString()
+                    ??
+                    "--",
+                textColor:
+                textColor,
+                cardColor:
+                cardColor,
               ),
-
-            )
-
-          ],
-
+              const SizedBox(
+                height: 20,
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  loadUser();
+                },
+                child:
+                const Text(
+                  "Refresh",
+                ),
+              ),
+            ],
+          ),
         ),
-
       ),
-
     );
-
   }
 
 }
