@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiService {
 
   // Android Emulator URL
-  static const String baseUrl = "http://192.168.45.182:8000";
+  static const String baseUrl = "http://192.168.1.158:8000";
 
 
   static Future<Map<String, dynamic>> signup({

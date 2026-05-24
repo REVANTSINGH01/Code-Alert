@@ -42,6 +42,8 @@ class _LoginPageState extends State<LoginPage> {
         "username",
         user["user"]["name"],
       );
+      await ApiService.syncDashboard();
+      if(!mounted)return;
       print(user);
       Navigator.pushReplacementNamed(
         context,

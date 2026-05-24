@@ -13,15 +13,12 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePage extends State<ProfilePage> {
-
   String username = "User";
-
   double? lcRating;
-
   int? cfRating;
-
+  int? lcSolved;
+  int? cfSolved;
   bool loading = true;
-
   Timer? syncTimer;
 
   @override
@@ -86,7 +83,8 @@ class _ProfilePage extends State<ProfilePage> {
         )
             :
         null;
-
+        lcSolved = dashboard["leetcode"]?["problems_solved"];
+        cfSolved = dashboard["codeforces"]?["problems_solved"];
         loading = false;
 
       });
@@ -117,6 +115,11 @@ class _ProfilePage extends State<ProfilePage> {
 
       color: cardColor,
 
+      margin:
+      const EdgeInsets.only(
+        bottom: 12,
+      ),
+
       child: ListTile(
 
         leading: Icon(
@@ -135,6 +138,8 @@ class _ProfilePage extends State<ProfilePage> {
           value,
           style: TextStyle(
             color: textColor,
+            fontWeight:
+            FontWeight.bold,
           ),
         ),
 
@@ -253,7 +258,7 @@ class _ProfilePage extends State<ProfilePage> {
               ),
 
               const SizedBox(
-                height: 20,
+                height: 24,
               ),
 
               profileCard(
@@ -276,6 +281,17 @@ class _ProfilePage extends State<ProfilePage> {
                 cardColor:
                 cardColor,
 
+              ),
+              profileCard(
+                icon: Icons.task_alt,
+                title: "LeetCode Questions",
+                value:
+                lcSolved
+                    ?.toString()
+                    ??
+                    "--",
+                textColor: textColor,
+                cardColor: cardColor,
               ),
               profileCard(
 
