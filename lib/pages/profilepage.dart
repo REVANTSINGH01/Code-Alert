@@ -25,10 +25,13 @@ class _ProfilePage extends State<ProfilePage> {
   void initState() {
     super.initState();
 
-    loadUser();
+    WidgetsBinding.instance.addPersistentFrameCallback((_){
+      loadUser();
+      },
+    );
 
     syncTimer = Timer.periodic(
-      const Duration(minutes: 5),
+      const Duration(minutes: 2),
           (_) {
         if (mounted) {
           loadUser(showLoader: false);
@@ -92,12 +95,20 @@ class _ProfilePage extends State<ProfilePage> {
     } catch (e) {
 
       print(e);
+      if(e.toString().contains("Session_Expired",)){
+        syncTimer?.cancel();
+        final prefs=await SharedPreferences.getInstance();
+        await prefs.clear();
+        if (!mounted) return;
+        Navigator.pushNamedAndRemoveUntil(context, '/login', (route)=>false,);
+        return;
+      }
 
-      if (!mounted) return;
-
-      setState(() {
-        loading = false;
-      });
+      if(mounted){
+        setState(() {
+          loading = false;
+        });
+      }
 
     }
 
@@ -308,6 +319,17 @@ class _ProfilePage extends State<ProfilePage> {
                 textColor,
                 cardColor:
                 cardColor,
+              ),
+              profileCard(
+                icon: Icons.emoji_events,
+                title: "Codeforces Questions",
+                value:
+                cfSolved
+                    ?.toString()
+                    ??
+                    "--",
+                textColor: textColor,
+                cardColor: cardColor,
               ),
               const SizedBox(
                 height: 20,

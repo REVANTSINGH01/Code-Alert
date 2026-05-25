@@ -22,12 +22,13 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-
+      print("1 LOGIN START");
       final user = await ApiService.login(
 
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
+      print("2 API DONE");
       final prefs = await SharedPreferences.getInstance();
 
       await prefs.setString(
@@ -42,32 +43,22 @@ class _LoginPageState extends State<LoginPage> {
         "username",
         user["user"]["name"],
       );
-      await ApiService.syncDashboard();
+      await prefs.setBool(
+        "is_logged_in",
+        true,
+      );
+      print("4 NAVIGATING");
       if(!mounted)return;
       print(user);
       Navigator.pushReplacementNamed(
         context,
         '/home_page',
       );
-      print(user);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-
-        const SnackBar(
-          content: Text("Login Successful"),
-        ),
-      );
+      print("5 DONE");
 
     } catch (e) {
-
+      print("LOGIN ERROR");
       print(e);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-
-        SnackBar(
-          content: Text(e.toString()),
-        ),
-      );
 
     }
 

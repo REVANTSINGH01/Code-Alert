@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_app/services/api_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'provider/theme_provider.dart';
@@ -14,6 +15,16 @@ import 'package:my_app/pages/user_setup.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   final prefs=await SharedPreferences.getInstance();
+  bool logged = prefs.getBool("is_logged_in") ?? false;
+  if(logged){
+    try{
+      print("AUTO LOGIN SYNC");
+      await ApiService.syncDashboard();
+    }
+    catch(e){
+      print(e);
+    }
+  }
   String? token=prefs.getString("token");
   Widget startPage;
   if (token != null) {

@@ -33,6 +33,16 @@ class HomePage extends StatefulWidget {
     Future<void> initialize() async {
       await loadUserData();
       await loadContests();
+      Future.microtask(() async {
+        try{
+          await ApiService.syncDashboard();
+        }
+        catch(e){
+          print(e);
+        }
+      });
+
+
     }
     Future<void> loadUserData()
     async {
@@ -45,6 +55,11 @@ class HomePage extends StatefulWidget {
 
     Future<void> loadContests()
     async {
+      if(mounted){
+        setState(() {
+          contestsLoading=true;
+        });
+      }
       try{
         final data =
         await ApiService
@@ -55,30 +70,18 @@ class HomePage extends StatefulWidget {
           ),
 
         );
+        if(!mounted)return;
         print(data);
         if(!mounted)
           return;
-
-        setState(() {
-
-          contests =
-              data;
-
-          contestsLoading =
-          false;
-
-        });
-
       }
       catch(e){
-        print(
-            "Contest Error:"
-        );
         print(e);
-        if(!mounted)
-          return;
+
+      }
+      finally{
         setState(() {
-          contests = [];
+
           contestsLoading =
           false;
 

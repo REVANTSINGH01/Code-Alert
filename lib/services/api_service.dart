@@ -47,7 +47,9 @@ class ApiService {
         "username",
         data["user"]["name"],
       );
+
       return data;
+
     } else {
       throw Exception(data["detail"]);
     }
@@ -63,7 +65,7 @@ class ApiService {
   }) async {
 
     final response = await http.post(
-      Uri.parse("$baseUrl/login"),
+      Uri.parse("$baseUrl/login",),
       headers: {
         "Content-Type": "application/json",
       },
@@ -71,27 +73,14 @@ class ApiService {
         "email": email,
         "password": password,
       }),
-    );
+    ).timeout(const Duration(seconds: 15,),);
+    print(response.statusCode,);
+    print(response.body,);
     final data = jsonDecode(response.body);
     if (response.statusCode == 200) {
-      final prefs =
-      await SharedPreferences
-          .getInstance();
-      await prefs.setString(
-        "token",
-        data["access_token"],
-      );
-      await prefs.setString(
-        "user_id",
-        data["user"]["id"],
-      );
-      await prefs.setString(
-        "username",
-        data["user"]["name"],
-      );
       return data;
     } else {
-      throw Exception(data["detail"]);
+      throw Exception(data["detail"]??"Login Failed",);
     }
   }
 
@@ -249,7 +238,7 @@ class ApiService {
     print(token);
     if(token==null) {
       throw Exception(
-        "Login Reuqired"
+        "Login Required"
       );
     }
     final response =
@@ -260,12 +249,16 @@ class ApiService {
         headers:{
 
           "Authorization":
-          "Bearer $token"
-        }
-    );
+          "Bearer $token",
+        },
+    ).timeout(const Duration(seconds: 15),);
     print(response.statusCode);
     print(response.body);
-
+    if(response.statusCode==401){
+      await SharedPreferences.getInstance();
+      await prefs.clear();
+      throw Exception("Session_Expired");
+    }
     final data =
     jsonDecode(
         response.body
@@ -280,6 +273,7 @@ class ApiService {
       return data;
 
     }
+
 
     throw Exception(
         data["detail"]
