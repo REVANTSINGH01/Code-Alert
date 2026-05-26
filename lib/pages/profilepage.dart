@@ -25,7 +25,7 @@ class _ProfilePage extends State<ProfilePage> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPersistentFrameCallback((_){
+    WidgetsBinding.instance.addPostFrameCallback((_){
       loadUser();
       },
     );

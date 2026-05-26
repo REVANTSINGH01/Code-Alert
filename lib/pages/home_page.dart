@@ -68,12 +68,12 @@ class HomePage extends StatefulWidget {
           const Duration(
               seconds: 8
           ),
-
         );
         if(!mounted)return;
         print(data);
-        if(!mounted)
-          return;
+        setState(() {
+          contests = data;
+        });
       }
       catch(e){
         print(e);
