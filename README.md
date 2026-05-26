@@ -1,130 +1,406 @@
 # 🚀 CodeAlert
+### Competitive Programming Tracker & Contest Reminder
 
-**CodeAlert** is a Flutter-based mobile application designed to help developers stay updated with competitive programming platforms like **Codeforces, CodeChef, and LeetCode** — all in one place.
+CodeAlert is a full-stack mobile application built to centralize competitive programming activities across multiple coding platforms.
 
-> ⚠️ **Note:** This project is currently in the **development phase**. Many features are still static and under active implementation.
-
----
-
-## 📱 Features (Current)
-
-* 🏠 **Home Dashboard**
-  Displays a centralized view of coding platforms
-
-* 👤 **Profile Page**
-  Basic UI for user profile (static)
-
-* ⏰ **Reminders Section**
-  Placeholder UI for contest reminders
-
-* ⚙️ **Settings Page**
-  Dynamic settings interface
-
-* 📊 **Platform Icons Integration**
-  Supports Codeforces, CodeChef, and LeetCode assets
+Track ratings, solved questions, upcoming contests, and reminders — all from one dashboard.
 
 ---
 
-## 🚧 Work in Progress
+# 📌 Features
 
-* 🔄 Dynamic data fetching from APIs
-* 🔔 Real-time contest notifications
-* 👥 User authentication & profiles
-* 📈 Progress tracking and analytics
-* 🎯 Personalized recommendations
+✅ User Authentication (Signup/Login)
+
+✅ JWT Session Management
+
+✅ Platform Handle Integration
+
+✅ Contest Tracking
+
+✅ Contest Countdown Timer
+
+✅ Coding Profile Monitoring
+
+✅ Theme Support (Dark / Light)
+
 
 ---
 
-## 🛠️ Tech Stack
+# 🏗️ High Level Design (HLD)
 
-* **Frontend:** Flutter (Dart)
-* **State Management:** (To be decided)
-* **Backend:** Planned (Future integration)
-* **APIs:** Competitive programming platforms (planned)
+## System Overview
+
+```text
+                    ┌────────────────────┐
+                    │    Flutter App     │
+                    │--------------------│
+                    │ Login / Signup     │
+                    │ Dashboard          │
+                    │ Profile            │
+                    │ Contest Feed       │
+                    │ Reminders          │
+                    └─────────┬──────────┘
+                              │
+                         REST APIs
+                              │
+                              ▼
+
+                  ┌────────────────────┐
+                  │   FastAPI Backend   │
+                  │---------------------│
+                  │ Authentication      │
+                  │ Dashboard Sync      │
+                  │ Contest Aggregator  │
+                  │ Reminder Service    │
+                  └─────────┬───────────┘
+                            │
+        ┌───────────────────┼───────────────────┐
+        ▼                   ▼                   ▼
+
+ ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+ │ MongoDB      │  │ LeetCode API │  │ Codeforces   │
+ │ User Data    │  │ GraphQL      │  │ Public API   │
+ │ Profiles     │  │              │  │              │
+ │ Contests     │  └──────────────┘  └──────────────┘
+ │ Reminders    │
+ └──────────────┘
+```
 
 ---
 
-## 📂 Project Structure
+# ⚙️ Low Level Design (LLD)
+
+## Frontend Structure
 
 ```text
 lib/
- ├── main.dart
- ├──Backend/
- │   └── main.py
- │
- ├── pages/
- │   ├── home_page.dart
- │   ├── profilepage.dart
- │   ├── reminders.dart
- │   ├── settings.dart
- │   └── about_app.dart
-assets/
- └── svgs/
+│
+├── pages/
+│   ├── login_page.dart
+│   ├── signup_page.dart
+│   ├── home_page.dart
+│   ├── profile_page.dart
+│   ├── platform_detail.dart
+│   ├── reminder_page.dart
+│   └── settings.dart
+│
+├── services/
+│   └── api_service.dart
+│
+├── provider/
+│   └── theme_provider.dart
+│
+└── main.dart
 ```
 
 ---
 
-## 🚀 Getting Started
+## Backend Structure
 
-### 1️⃣ Clone the repository
-
-```bash
-git clone https://github.com/REVANTSINGH01/Code-Alert.git
-cd Code-Alert
+```text
+backend/
+│
+├── app/
+│
+├── routers/
+│   ├── users.py
+│   ├── dashboard.py
+│   ├── contests.py
+│   ├── leetcode.py
+│   ├── codeforces.py
+│   ├── reminders.py
+│
+├── auth/
+│   └── auth_handler.py
+│
+├── database/
+│   └── database.py
+│
+└── main.py
 ```
 
-### 2️⃣ Install dependencies
+---
+
+# 🧩 System Architecture
+
+## User Authentication Flow
+
+```text
+User
+↓
+
+Flutter Login
+
+↓
+
+POST /login
+
+↓
+
+JWT Generated
+
+↓
+
+Store SharedPreferences
+
+↓
+
+Navigate Home
+```
+
+---
+
+## Dashboard Sync Flow
+
+```text
+Profile Open
+
+↓
+
+syncDashboard()
+
+↓
+
+Verify Token
+
+↓
+
+Fetch Platform Data
+
+↓
+
+Update MongoDB
+
+↓
+
+Return Dashboard
+
+↓
+
+Refresh UI
+```
+
+---
+
+## Contest Flow
+
+```text
+Open Home
+
+↓
+
+GET /contests
+
+↓
+
+Contest Service
+
+↓
+
+Contest Cards
+
+↓
+
+Live Countdown
+```
+
+---
+
+# 🗄️ Database Schemas
+
+## users
+
+```json
+{
+ "_id":"ObjectId",
+ "name":"Revant",
+ "email":"user@gmail.com",
+ "password":"****",
+ "handles":{
+   "cf_handle":"abc",
+   "lc_handle":"xyz"
+ }
+}
+```
+
+---
+
+## lc_profile
+
+```json
+{
+"user_id":"123",
+"rating":1824,
+"global_ranking":40000,
+"problems_solved":745
+}
+```
+
+---
+
+## cf_profile
+
+```json
+{
+"user_id":"123",
+"rating":1487
+}
+```
+
+---
+
+## contests
+
+```json
+{
+"name":"Weekly Contest",
+"platform":"LeetCode",
+"start_time":"timestamp"
+}
+```
+
+---
+
+## reminders
+
+```json
+{
+"user_id":"123",
+"contest_name":"Codeforces Round",
+"time":"timestamp"
+}
+```
+
+---
+
+# 🔌 API Endpoints
+
+## Auth
+
+```http
+POST /signup
+POST /login
+```
+
+## User
+
+```http
+PUT /users/handles
+POST /dashboard/sync
+```
+
+## Contest
+
+```http
+GET /contests
+```
+
+## Reminder
+
+```http
+POST /reminder
+GET /reminders/{id}
+```
+
+---
+
+# 🛠️ Tech Stack
+
+## Frontend
+
+- Flutter
+- Dart
+- Provider
+- SharedPreferences
+
+---
+
+## Backend
+
+- FastAPI
+- JWT Authentication
+- Async Processing
+- REST APIs
+
+---
+
+## Database
+
+- MongoDB
+
+---
+
+## External APIs
+
+- LeetCode GraphQL
+- Codeforces API
+- CodeChef Data Source
+
+---
+
+# 📈 Current Progress
+
+## Completed
+
+- [x] Authentication
+- [x] JWT Login
+- [x] Persistent Session
+- [x] Contest Fetch
+- [x] Contest Countdown
+- [x] Profile Page
+- [x] Platform Handle Setup
+- [x] Dashboard Sync
+- [x] Rating Tracking
+- [x] Questions Solved Tracking
+- [x] Theme Support
+- [x] Auto Refresh
+- [x] Reminder Backend
+
+---
+
+## In Progress
+
+- [ ] Notification Integration
+- [ ] Profile Analytics
+- [ ] Contest Filtering
+- [ ] Better Error Handling
+- [ ] Background Sync
+
+---
+
+## Planned
+
+- [ ] Push Notifications
+- [ ] Leaderboards
+- [ ] AI Contest Recommendation
+- [ ] Statistics Dashboard
+- [ ] Activity Graph
+- [ ] Multi-device Sync
+
+---
+
+# 🚀 Installation
 
 ```bash
+git clone <repo>
+
+cd codealert
+
 flutter pub get
-```
 
-### 3️⃣ Run the app
-
-```bash
 flutter run
 ```
 
----
+Backend:
 
-## 🎯 Vision
+```bash
+cd backend
 
-CodeAlert aims to become a **one-stop solution** for competitive programmers by:
-
-* Aggregating contest data
-* Sending smart reminders
-* Tracking performance across platforms
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome!
-Feel free to fork the repo and submit a pull request.
-
----
-
-## 📌 Status
-
-```
-🚧 Project Status: Active Development
+uvicorn app.main:app --host 0.0.0.0 --reload
 ```
 
 ---
 
-## 📄 License
+# 👨‍💻 Contributors
 
-This project is open-source and available under the MIT License.
-
----
-
-## 👨‍💻 Authors
-
-**Revant Singh**
-
-
-**Nidhiansh Chauhan**
-
----
-
-⭐ If you like this project, consider giving it a star!
+Built with ❤️ using Flutter + FastAPI + MongoDB
