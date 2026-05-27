@@ -12,7 +12,7 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePage();
 }
 
-class _ProfilePage extends State<ProfilePage> {
+class _ProfilePage extends State<ProfilePage> with WidgetsBindingObserver{
   String username = "User";
   double? lcRating;
   int? cfRating;
@@ -24,6 +24,8 @@ class _ProfilePage extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
 
     WidgetsBinding.instance.addPostFrameCallback((_){
       loadUser();
@@ -38,6 +40,16 @@ class _ProfilePage extends State<ProfilePage> {
         }
       },
     );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // The moment the app comes back to the foreground, silently refresh!
+      if (mounted) {
+        loadUser(showLoader: false);
+      }
+    }
   }
 
   Future<void> loadUser({
@@ -162,7 +174,7 @@ class _ProfilePage extends State<ProfilePage> {
 
   @override
   void dispose() {
-
+    WidgetsBinding.instance.removeObserver(this);
     syncTimer?.cancel();
 
     super.dispose();

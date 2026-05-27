@@ -144,7 +144,7 @@ class HomePage extends StatefulWidget {
                 title:  Text("H O M E"),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.pushNamed(context,'/home_page');
+                  Navigator.pushReplacementNamed(context,'/home_page');
                 },
               ),
               ListTile(
