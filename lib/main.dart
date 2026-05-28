@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
         '/profilepage': (context) => ProfilePage(),
         '/settings' : (context) => Settings(),
         '/about_app' : (context) => AboutApp(),
-        '/reminders' : (context) => Reminders(),
+        '/reminders' : (context) => RemindersPage(),
       },
     );
   }

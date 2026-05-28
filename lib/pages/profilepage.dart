@@ -16,8 +16,10 @@ class _ProfilePage extends State<ProfilePage> with WidgetsBindingObserver{
   String username = "User";
   double? lcRating;
   int? cfRating;
+  int? ccRating;
   int? lcSolved;
   int? cfSolved;
+  int? ccSolved;
   bool loading = true;
   Timer? syncTimer;
 
@@ -98,8 +100,11 @@ class _ProfilePage extends State<ProfilePage> with WidgetsBindingObserver{
         )
             :
         null;
+        ccRating =dashboard["codechef"]!=null ?int.tryParse(dashboard["codechef"]["rating"]
+            .toString(),):null;
         lcSolved = dashboard["leetcode"]?["problems_solved"];
         cfSolved = dashboard["codeforces"]?["problems_solved"];
+        ccSolved = dashboard["codechef"]?["problems_solved"];
         loading = false;
 
       });
@@ -337,6 +342,42 @@ class _ProfilePage extends State<ProfilePage> with WidgetsBindingObserver{
                 title: "Codeforces Questions",
                 value:
                 cfSolved
+                    ?.toString()
+                    ??
+                    "--",
+                textColor: textColor,
+                cardColor: cardColor,
+              ),
+              const SizedBox(
+                height: 24,
+              ),
+
+              profileCard(
+
+                icon:
+                Icons.code,
+
+                title:
+                "Codechef Rating",
+
+                value:
+                ccRating
+                    ?.toStringAsFixed(2)
+                    ??
+                    "--",
+
+                textColor:
+                textColor,
+
+                cardColor:
+                cardColor,
+
+              ),
+              profileCard(
+                icon: Icons.task_alt,
+                title: "CodeChef Questions",
+                value:
+                ccSolved
                     ?.toString()
                     ??
                     "--",
