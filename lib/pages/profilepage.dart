@@ -20,6 +20,8 @@ class _ProfilePage extends State<ProfilePage> with WidgetsBindingObserver{
   int? lcSolved;
   int? cfSolved;
   int? ccSolved;
+  String? cfRank;
+  String? ccStars;
   bool loading = true;
   Timer? syncTimer;
 
@@ -105,6 +107,8 @@ class _ProfilePage extends State<ProfilePage> with WidgetsBindingObserver{
         lcSolved = dashboard["leetcode"]?["problems_solved"];
         cfSolved = dashboard["codeforces"]?["problems_solved"];
         ccSolved = dashboard["codechef"]?["problems_solved"];
+        cfRank=dashboard["codeforces"]?["rank"];
+        ccStars=dashboard["codechef"]?["stars"];
         loading = false;
 
       });
@@ -324,7 +328,7 @@ class _ProfilePage extends State<ProfilePage> with WidgetsBindingObserver{
               profileCard(
 
                 icon:
-                Icons.star,
+                Icons.task_alt,
                 title:
                 "Codeforces Rating",
                 value:
@@ -373,6 +377,13 @@ class _ProfilePage extends State<ProfilePage> with WidgetsBindingObserver{
                 cardColor,
 
               ),
+              profileCard(icon: Icons.stars,
+                  title: "Codeforces Title",
+                  value: cfRank?.toString() ?? "--",
+                  textColor: textColor,
+                  cardColor: cardColor
+
+              ),
               profileCard(
                 icon: Icons.task_alt,
                 title: "CodeChef Questions",
@@ -384,6 +395,13 @@ class _ProfilePage extends State<ProfilePage> with WidgetsBindingObserver{
                 textColor: textColor,
                 cardColor: cardColor,
               ),
+
+              profileCard(
+                  icon: Icons.star,
+                  title: "Codechef Stars",
+                  value: ccStars?.toString() ?? "--",
+                  textColor: textColor,
+                  cardColor: cardColor),
               const SizedBox(
                 height: 20,
               ),
