@@ -13,7 +13,12 @@ class HomePage extends StatefulWidget {
       _HomePageState();
 }
   class _HomePageState extends State<HomePage>{
+
+
+    // 🔴 ADD THIS: Tracks the currently selected date on the calendar
+    DateTime selectedDate = DateTime.now();
     Timer? timer;
+    Timer? dataSyncTimer;
     String username="";
     List contests = [];
     bool contestsLoading = true;
@@ -95,6 +100,75 @@ class HomePage extends StatefulWidget {
       if(!mounted)return ;
       Navigator.pushNamedAndRemoveUntil(context, '/login',(route)=>false,);
     }
+
+    // 📅 Custom Horizontal Calendar
+    Widget _buildCalendar(Color textColor, Color cardColor, Color accentBlue) {
+      return SizedBox(
+        height: 85, // Fixed height for the calendar strip
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: 30, // Shows the next 30 days
+          itemBuilder: (context, index) {
+            // Calculate the date for each item
+            DateTime currentDate = DateTime.now().add(Duration(days: index));
+
+            // Check if this specific card is the one the user selected
+            bool isSelected = currentDate.day == selectedDate.day &&
+                currentDate.month == selectedDate.month &&
+                currentDate.year == selectedDate.year;
+
+            // Format day name (e.g., "Mon") and date (e.g., "15")
+            String dayName = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][currentDate.weekday - 1];
+            String dayNumber = currentDate.day.toString();
+
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedDate = currentDate;
+                  // TODO later: Filter your 'contests' list based on this selectedDate!
+                });
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                margin: const EdgeInsets.only(right: 12),
+                width: 65,
+                decoration: BoxDecoration(
+                  // Neon glow effect if selected
+                  color: isSelected ? accentBlue.withValues(alpha: 0.1) : cardColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isSelected ? accentBlue : Colors.grey.withValues(alpha: 0.1),
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      dayName,
+                      style: TextStyle(
+                        color: isSelected ? accentBlue : textColor.withValues(alpha: 0.5),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      dayNumber,
+                      style: TextStyle(
+                        color: isSelected ? accentBlue : textColor,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
     @override
     Widget build(BuildContext context) {
       final theme=context.watch<ThemeProvider>();
@@ -160,7 +234,7 @@ class HomePage extends StatefulWidget {
                 title:  Text("P R O F I L E"),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.pushNamed(context, '/profilepage');
+                  Navigator.pushNamed(context,'/profilepage');
                 },
               ),
               ListTile(
@@ -255,7 +329,7 @@ class HomePage extends StatefulWidget {
                 ),
 
                 const SizedBox(height: 15),
-
+                _buildCalendar(textColor, cardColor, const Color(0xFF00E5FF)),
                 Expanded(
 
                   child:
@@ -469,17 +543,7 @@ class HomePage extends StatefulWidget {
 
           ),
 
-          trailing:
 
-          Icon(
-
-            Icons
-                .notifications_active,
-
-            color:
-            textColor,
-
-          ),
 
         ),
 
