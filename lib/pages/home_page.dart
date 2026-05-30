@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../provider/theme_provider.dart';
 import '../services/api_service.dart';
 import 'dart:async';
-
+import '../pages/custom_calendar.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
   @override
@@ -14,7 +14,11 @@ class HomePage extends StatefulWidget {
 }
   class _HomePageState extends State<HomePage>{
 
-
+    final List<DateTime> myContestDates = [
+      DateTime.now(),
+      DateTime.now().add(const Duration(days: 2)),
+      DateTime.now().add(const Duration(days: 5)),
+    ];
     // 🔴 ADD THIS: Tracks the currently selected date on the calendar
     DateTime selectedDate = DateTime.now();
     Timer? timer;
@@ -99,75 +103,6 @@ class HomePage extends StatefulWidget {
       await prefs.clear();
       if(!mounted)return ;
       Navigator.pushNamedAndRemoveUntil(context, '/login',(route)=>false,);
-    }
-
-    // 📅 Custom Horizontal Calendar
-    Widget _buildCalendar(Color textColor, Color cardColor, Color accentBlue) {
-      return SizedBox(
-        height: 85, // Fixed height for the calendar strip
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: 30, // Shows the next 30 days
-          itemBuilder: (context, index) {
-            // Calculate the date for each item
-            DateTime currentDate = DateTime.now().add(Duration(days: index));
-
-            // Check if this specific card is the one the user selected
-            bool isSelected = currentDate.day == selectedDate.day &&
-                currentDate.month == selectedDate.month &&
-                currentDate.year == selectedDate.year;
-
-            // Format day name (e.g., "Mon") and date (e.g., "15")
-            String dayName = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][currentDate.weekday - 1];
-            String dayNumber = currentDate.day.toString();
-
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  selectedDate = currentDate;
-                  // TODO later: Filter your 'contests' list based on this selectedDate!
-                });
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                margin: const EdgeInsets.only(right: 12),
-                width: 65,
-                decoration: BoxDecoration(
-                  // Neon glow effect if selected
-                  color: isSelected ? accentBlue.withValues(alpha: 0.1) : cardColor,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isSelected ? accentBlue : Colors.grey.withValues(alpha: 0.1),
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      dayName,
-                      style: TextStyle(
-                        color: isSelected ? accentBlue : textColor.withValues(alpha: 0.5),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      dayNumber,
-                      style: TextStyle(
-                        color: isSelected ? accentBlue : textColor,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      );
     }
     @override
     Widget build(BuildContext context) {
@@ -327,9 +262,23 @@ class HomePage extends StatefulWidget {
                   "Upcoming Contests",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
+                Center(
+                  child: FractionallySizedBox(
+                    widthFactor: 0.70, // Takes up 70% of the screen width
+                    child: MonthlyCalendar(
+                      cardColor: cardColor,
+                      textColor: textColor,
+                      accentColor: const Color(0xFF00E5FF),
+                      contestDates: myContestDates, // Or whatever your variable is
+                      onDateSelected: (date) {
+                        print("Selected: $date");
+                      },
+                    ),
+                  ),
+                ),
 
+                const SizedBox(height: 20),
                 const SizedBox(height: 15),
-                _buildCalendar(textColor, cardColor, const Color(0xFF00E5FF)),
                 Expanded(
 
                   child:
