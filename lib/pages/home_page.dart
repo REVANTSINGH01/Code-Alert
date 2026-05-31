@@ -6,6 +6,7 @@ import '../provider/theme_provider.dart';
 import '../services/api_service.dart';
 import 'dart:async';
 import '../pages/custom_calendar.dart';
+import '../pages/overlay_page.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
   @override
@@ -264,7 +265,8 @@ class HomePage extends StatefulWidget {
                 ),
                 Center(
                   child: FractionallySizedBox(
-                    widthFactor: 0.70, // Takes up 70% of the screen width
+                    widthFactor: 0.55,
+                    // Takes up 70% of the screen width
                     child: MonthlyCalendar(
                       cardColor: cardColor,
                       textColor: textColor,
@@ -309,23 +311,19 @@ class HomePage extends StatefulWidget {
 
                       final contest =
                       contests[index];
-
-                      return contestCard(
-
-                        textColor,
-
-                        contest["name"],
-
-                        contest["start_time"],
-
-                        getIcon(
-                            contest["platform"]
-                        ),
-
-                        cardColor,
-
+                      return InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () {
+                            showContestDetails(context, contest, textColor);
+                            },
+                          child: contestCard(
+                            textColor,
+                            contest["name"],
+                            contest["start_time"],
+                            getIcon(contest["platform"]),
+                            cardColor,
+                          ),
                       );
-
                     },
 
                   ),
