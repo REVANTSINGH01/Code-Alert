@@ -47,7 +47,7 @@ class ApiService {
         "username",
         data["user"]["name"],
       );
-
+      await prefs.setBool("is_admin", data["user"]["is_admin"] ?? false);
       return data;
 
     } else {
@@ -78,6 +78,13 @@ class ApiService {
     print(response.body,);
     final data = jsonDecode(response.body);
     if (response.statusCode == 200) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString("token", data["access_token"]);
+      if (data["user"] != null) {
+        await prefs.setString("user_id", data["user"]["id"]);
+        await prefs.setString("username", data["user"]["name"]);
+        await prefs.setBool("is_admin", data["user"]["is_admin"] ?? false);
+      }
       return data;
     } else {
       throw Exception(data["detail"]??"Login Failed",);
