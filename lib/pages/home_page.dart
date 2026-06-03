@@ -20,11 +20,11 @@ class HomePage extends StatefulWidget {
       DateTime.now().add(const Duration(days: 2)),
       DateTime.now().add(const Duration(days: 5)),
     ];
-    // 🔴 ADD THIS: Tracks the currently selected date on the calendar
     DateTime selectedDate = DateTime.now();
     Timer? timer;
     Timer? dataSyncTimer;
     String username="";
+    bool is_admin=false;
     List contests = [];
     bool contestsLoading = true;
     @override
@@ -59,6 +59,7 @@ class HomePage extends StatefulWidget {
       final prefs =await SharedPreferences.getInstance();
       if(!mounted)return;
       setState((){
+        is_admin=prefs.getBool("is_admin") ?? false;
         username = prefs.getString("username") ?? "User";
       });
     }
@@ -154,7 +155,7 @@ class HomePage extends StatefulWidget {
                 title:  Text("H O M E"),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.pushReplacementNamed(context,'/home_page');
+
                 },
               ),
               ListTile(
@@ -191,6 +192,24 @@ class HomePage extends StatefulWidget {
 
                 },
               ),
+              if (is_admin) ...[
+                const Divider(color: Colors.redAccent),
+                ListTile(
+                  leading: const Icon(Icons.security, color: Colors.redAccent),
+                  title: const Text(
+                    "A D M I N   P A N E L",
+                    style: TextStyle(
+                      color: Colors.redAccent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/admin_dashboard');
+                  },
+                ),
+                const Divider(color: Colors.redAccent),
+              ],
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ElevatedButton.icon(

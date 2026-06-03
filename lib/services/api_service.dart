@@ -83,8 +83,16 @@ class ApiService {
       if (data["user"] != null) {
         await prefs.setString("user_id", data["user"]["id"]);
         await prefs.setString("username", data["user"]["name"]);
-        await prefs.setBool("is_admin", data["user"]["is_admin"] ?? false);
-      }
+        bool is_admin=false;
+        final adminData = data["user"]["is_admin"];
+
+        if (adminData is bool) {
+          is_admin = adminData;
+        } else if (adminData is String) {
+          is_admin = adminData.toLowerCase() == 'true';
+        }
+
+        await prefs.setBool("is_admin", is_admin);      }
       return data;
     } else {
       throw Exception(data["detail"]??"Login Failed",);

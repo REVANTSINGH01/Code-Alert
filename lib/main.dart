@@ -11,6 +11,7 @@ import 'package:my_app/pages/reminders.dart';
 import 'package:my_app/pages/login_page.dart';
 import 'package:my_app/pages/sign_up.dart';
 import 'package:my_app/pages/user_setup.dart';
+import 'package:my_app/pages/admin_dashboard.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,6 +61,7 @@ class MyApp extends StatelessWidget {
         '/settings' : (context) => Settings(),
         '/about_app' : (context) => AboutApp(),
         '/reminders' : (context) => RemindersPage(),
+        '/admin_dashboard' : (context) => const AdminDashboardPage(),
       },
     );
   }
