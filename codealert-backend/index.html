@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeAlert Master Dashboard</title>
+    <style>
+        :root {
+            --primary: #007BFF;
+            --success: #28a745;
+            --danger: #dc3545;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --light: #f8f9fa;
+        }
+
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; padding: 20px; background-color: #f0f2f5; color: var(--dark); }
+        .container { max-width: 850px; margin: auto; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        
+        h1 { text-align: center; color: var(--primary); font-weight: 800; margin-bottom: 5px;}
+        .status-bar { text-align: center; margin-bottom: 25px; font-size: 14px; color: var(--gray); font-weight: 500;}
+
+        input { display: block; width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px;}
+        
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        button { padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; flex: 1; transition: 0.2s; min-width: 120px; font-size: 14px;}
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-secondary { background: var(--gray); }
+        .btn-danger { background: var(--danger); }
+
+        /* Dashboard Grid Layout */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-top: 20px; }
+        .stat-card { background: var(--light); padding: 20px; border-radius: 12px; border-left: 6px solid var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.04);}
+        .stat-card h4 { margin: 0 0 10px 0; color: var(--gray); text-transform: uppercase; font-size: 13px; letter-spacing: 1px; }
+        
+        /* Making the Solved count huge! */
+        .stat-card .val { font-size: 32px; font-weight: 900; display: block; margin-bottom: 8px; color: var(--dark); }
+        .stat-card .label { font-size: 14px; color: var(--gray); font-weight: 500;}
+
+        /* Platform specific colors */
+        .platform-cf { border-left-color: #FFD700; } /* Codeforces Gold */
+        .platform-lc { border-left-color: #FFA116; } /* LeetCode Orange */
+        .platform-cc { border-left-color: #5B4638; } /* CodeChef Brown */
+
+        .hidden { display: none; }
+        #auth-msg { color: var(--danger); font-weight: bold; text-align: center; margin-top: 10px; }
+        
+        /* Contest List Styling */
+        .contest-item { padding: 12px; border-bottom: 1px solid #eee; font-size: 15px; display: flex; align-items: center; gap: 10px;}
+        .contest-item:last-child { border-bottom: none; }
+        .tag { font-size: 11px; padding: 4px 8px; border-radius: 6px; background: #e9ecef; font-weight: 700; color: var(--dark); text-transform: uppercase; letter-spacing: 0.5px;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>CodeAlert Dashboard</h1>
+    <div class="status-bar">User ID: <span id="display-id" style="color: var(--primary);">Not Authenticated</span></div>
+
+    <div id="auth-section" class="card">
+        <h3>Welcome Back</h3>
+        <input type="email" id="email" placeholder="Email Address">
+        <input type="password" id="password" placeholder="Password">
+        <div class="btn-group">
+            <button onclick="login()">Login</button>
+            <button onclick="signup()" class="btn-secondary">Create Account</button>
+        </div>
+        <p id="auth-msg"></p>
+        <p id="ngrok-notice" class="hidden" style="font-size: 12px; color: #666; text-align: center;">
+            Getting a "Network Error"? <a id="ngrok-link" href="#" target="_blank">Click here to authorize ngrok</a>, then try again.
+        </p>
+    </div>
+
+    <div id="handles-section" class="card hidden">
+        <h3>Link Your Profiles</h3>
+        <p style="font-size: 13px; color: var(--gray); margin-top: -10px; margin-bottom: 20px;">Leave blank if you don't use a platform.</p>
+        <input type="text" id="cf_handle" placeholder="Codeforces Username">
+        <input type="text" id="lc_handle" placeholder="LeetCode Username">
+        <input type="text" id="cc_handle" placeholder="CodeChef Username">
+        <div class="btn-group">
+            <button onclick="saveHandles()">Save & Sync Platforms</button>
+            <button class="btn-secondary" onclick="showSection('dashboard-section')">Cancel</button>
+        </div>
+    </div>
+
+    <div id="dashboard-section" class="hidden">
+        <div class="btn-group">
+            <button onclick="syncDashboard()">🔄 Refresh Stats</button>
+            <button onclick="fetchContests()" class="btn-secondary">📅 Contests</button>
+            <button onclick="showEditHandles()" class="btn-secondary">⚙️ Edit Handles</button>
+            <button onclick="logout()" class="btn-danger">Logout</button>
+        </div>
+
+        <div id="stats-container" class="stats-grid">
+            </div>
+
+        <div id="contests-container" class="card hidden" style="margin-top: 25px;">
+            <h3 style="margin-top: 0;">Upcoming Contests</h3>
+            <div id="contests-list"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // MAKE SURE THIS IS YOUR ACTIVE NGROK LINK!
+    const API_URL = "https://joyfully-embryotrophic-joane.ngrok-free.dev";
+    let currentUserId = null;
+
+    function showSection(id) {
+        ["auth-section", "handles-section", "dashboard-section"].forEach(s => document.getElementById(s).classList.add("hidden"));
+        document.getElementById(id).classList.remove("hidden");
+        document.getElementById("auth-msg").innerText = "";
+    }
+
+    async function login() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        try {
+            const res = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({email, password})
+            });
+            const data = await res.json();
+            if (res.ok) {
+                currentUserId = data.id;
+                document.getElementById('display-id').innerText = currentUserId;
+                if (data.handles) {
+                    document.getElementById('cf_handle').value = data.handles.cf_handle || "";
+                    document.getElementById('lc_handle').value = data.handles.lc_handle || "";
+                    document.getElementById('cc_handle').value = data.handles.cc_handle || "";
+                    showSection("dashboard-section");
+                    syncDashboard(); // Auto-load stats
+                } else {
+                    showSection("handles-section");
+                }
+            } else {
+                document.getElementById('auth-msg').innerText = data.detail;
+            }
+        } catch (err) { handleNetworkError(); }
+    }
+
+    async function signup() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        try {
+            const res = await fetch(`${API_URL}/signup`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name: email.split('@')[0], email, password})
+            });
+            if (res.ok) {
+                document.getElementById('auth-msg').style.color = "green";
+                document.getElementById('auth-msg').innerText = "Account Created! Logging in...";
+                setTimeout(login, 1000);
+            } else {
+                const data = await res.json();
+                document.getElementById('auth-msg').innerText = "Signup failed: " + JSON.stringify(data.detail);
+            }
+        } catch (err) { handleNetworkError(); }
+    }
+
+    async function saveHandles() {
+        const body = {
+            cf_handle: document.getElementById('cf_handle').value.trim() || null,
+            lc_handle: document.getElementById('lc_handle').value.trim() || null,
+            cc_handle: document.getElementById('cc_handle').value.trim() || null
+        };
+        try {
+            const res = await fetch(`${API_URL}/users/${currentUserId}/handles`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body)
+            });
+            if (res.ok) { 
+                showSection("dashboard-section"); 
+                syncDashboard(); 
+            }
+        } catch (err) { alert("Failed to save handles. Check network."); }
+    }
+
+    async function syncDashboard() {
+        const container = document.getElementById('stats-container');
+        container.innerHTML = "<h4 style='grid-column: 1/-1; text-align: center; color: var(--gray);'>Connecting to platforms...</h4>";
+        
+        try {
+            const res = await fetch(`${API_URL}/dashboard/sync/${currentUserId}`, {method: 'POST'});
+            const data = await res.json();
+            
+            container.innerHTML = ""; // Clear loading message
+            
+            // Render Cards: Notice how "problems_solved" is now passed as the primary value!
+            if(data.codeforces) renderCard(container, "Codeforces", data.codeforces.problems_solved, `Rating: ${data.codeforces.rating} • Rank: ${data.codeforces.rank}`, "platform-cf");
+            if(data.leetcode) renderCard(container, "LeetCode", data.leetcode.problems_solved, `Global Rank: ${data.leetcode.global_ranking}`, "platform-lc");
+            if(data.codechef) renderCard(container, "CodeChef", data.codechef.problems_solved, `Rating: ${data.codechef.rating} (${data.codechef.stars})`, "platform-cc");
+            
+            if(!data.codeforces && !data.leetcode && !data.codechef) {
+                container.innerHTML = "<h4 style='grid-column: 1/-1; text-align: center; color: var(--danger);'>No platforms linked. Click 'Edit Handles' to add them.</h4>";
+            }
+        } catch (err) {
+            container.innerHTML = "<h4 style='grid-column: 1/-1; text-align: center; color: var(--danger);'>Error syncing data.</h4>";
+        }
+    }
+
+    function renderCard(parent, title, solvedCount, subText, cssClass) {
+        parent.innerHTML += `
+            <div class="stat-card ${cssClass}">
+                <h4>${title}</h4>
+                <span class="val">${solvedCount} <span style="font-size: 16px; color: var(--gray); font-weight: 600;">Solved</span></span>
+                <span class="label">${subText}</span>
+            </div>
+        `;
+    }
+
+    async function fetchContests() {
+        const list = document.getElementById('contests-list');
+        document.getElementById('contests-container').classList.remove('hidden');
+        list.innerHTML = "<p style='color: var(--gray);'>Loading contests...</p>";
+        
+        try {
+            const res = await fetch(`${API_URL}/contests`);
+            const data = await res.json();
+            
+            if(data.length === 0) {
+                list.innerHTML = "<p>No upcoming contests found.</p>";
+                return;
+            }
+
+            list.innerHTML = data.map(c => `
+                <div class="contest-item">
+                    <span class="tag">${c.platform}</span> 
+                    <div style="display: flex; flex-direction: column;">
+                        <strong>${c.name}</strong>
+                        <small style="color: var(--gray);">${c.start_time}</small>
+                    </div>
+                </div>
+            `).join('');
+        } catch (err) {
+            list.innerHTML = "<p style='color: var(--danger);'>Failed to fetch contests.</p>";
+        }
+    }
+
+    function showEditHandles() { showSection("handles-section"); }
+    
+    function logout() { location.reload(); }
+
+    function handleNetworkError() {
+        document.getElementById('auth-msg').innerText = "Network Error: Cannot reach the backend.";
+        document.getElementById('ngrok-notice').classList.remove('hidden');
+        document.getElementById('ngrok-link').href = API_URL;
+    }
+</script>
+
+</body>
+</html>
