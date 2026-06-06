@@ -20,11 +20,18 @@ class HomePage extends StatefulWidget {
       DateTime.now().add(const Duration(days: 2)),
       DateTime.now().add(const Duration(days: 5)),
     ];
+<<<<<<< HEAD
     // 🔴 ADD THIS: Tracks the currently selected date on the calendar
+=======
+>>>>>>> 34ba924ec250ec323875a6c3f7295de5430cdb0f
     DateTime selectedDate = DateTime.now();
     Timer? timer;
     Timer? dataSyncTimer;
     String username="";
+<<<<<<< HEAD
+=======
+    bool is_admin=false;
+>>>>>>> 34ba924ec250ec323875a6c3f7295de5430cdb0f
     List contests = [];
     bool contestsLoading = true;
     @override
@@ -59,6 +66,10 @@ class HomePage extends StatefulWidget {
       final prefs =await SharedPreferences.getInstance();
       if(!mounted)return;
       setState((){
+<<<<<<< HEAD
+=======
+        is_admin=prefs.getBool("is_admin") ?? false;
+>>>>>>> 34ba924ec250ec323875a6c3f7295de5430cdb0f
         username = prefs.getString("username") ?? "User";
       });
     }
@@ -154,7 +165,11 @@ class HomePage extends StatefulWidget {
                 title:  Text("H O M E"),
                 onTap: () {
                   Navigator.pop(context);
+<<<<<<< HEAD
                   Navigator.pushReplacementNamed(context,'/home_page');
+=======
+
+>>>>>>> 34ba924ec250ec323875a6c3f7295de5430cdb0f
                 },
               ),
               ListTile(
@@ -191,6 +206,27 @@ class HomePage extends StatefulWidget {
 
                 },
               ),
+<<<<<<< HEAD
+=======
+              if (is_admin) ...[
+                const Divider(color: Colors.redAccent),
+                ListTile(
+                  leading: const Icon(Icons.security, color: Colors.redAccent),
+                  title: const Text(
+                    "A D M I N   P A N E L",
+                    style: TextStyle(
+                      color: Colors.redAccent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/admin_dashboard');
+                  },
+                ),
+                const Divider(color: Colors.redAccent),
+              ],
+>>>>>>> 34ba924ec250ec323875a6c3f7295de5430cdb0f
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ElevatedButton.icon(
