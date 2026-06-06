@@ -2,9 +2,9 @@ from fastapi import APIRouter,HTTPException,Depends,status
 from fastapi.security import HTTPAuthorizationCredentials
 from bson import ObjectId
 from typing import List
-from app.auth.auth_handler import verify_token,security
+from app.auth.auth_handler import verify_token,security,get_password_hash
 from app.database.database import user_collection,reminder_collection
-from app.schemas.schemas import UserResponse
+from app.schemas.schemas import UserResponse,AdminChangePassword
 
 router=APIRouter(tags=["Admin"])
 
@@ -48,3 +48,14 @@ async def toggle_admin_role(target_id:str,make_admin:bool,admin_id:str=Depends(g
     if res.matched_count==0:
         raise HTTPException(status_code=404,detail="User not found")
     return {"message":"User role updated"}
+
+@router.patch("/admin/users/{target_id}/password")
+async def admin_change_password(target_id:str,data:AdminChangePassword,admin_id:str=Depends(get_admin_user)):
+    hashed_pwd=get_password_hash(data.new_password)
+    res=await user_collection.update_one(
+        {"_id":ObjectId(target_id)},
+        {"$set":{"password":hashed_pwd}}
+    )
+    if res.matched_count==0:
+        raise HTTPException(status_code=404,detail="User not found")
+    return {"message":"Password updated successfully"}

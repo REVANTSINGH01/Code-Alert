@@ -1,6 +1,13 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List # Ensure Optional is here
+from pydantic import BaseModel
 
+class UserUpdatePassword(BaseModel):
+    old_password:str
+    new_password:str
+
+class AdminChangePassword(BaseModel):
+    new_password:str
 # ---- REMINDER SCHEMAS ----
 class ReminderCreate(BaseModel):
     contest_name: str
