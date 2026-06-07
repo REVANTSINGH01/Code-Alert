@@ -30,41 +30,8 @@ Track ratings, solved questions, upcoming contests, and reminders — all from o
 
 ## System Overview
 
-```text
-                    ┌────────────────────┐
-                    │    Flutter App     │
-                    │--------------------│
-                    │ Login / Signup     │
-                    │ Dashboard          │
-                    │ Profile            │
-                    │ Contest Feed       │
-                    │ Reminders          │
-                    └─────────┬──────────┘
-                              │
-                         REST APIs
-                              │
-                              ▼
+<img width="434" height="459" alt="image" src="https://github.com/user-attachments/assets/f68e70a7-aebf-42bf-a568-744cebfbd35d" />
 
-                  ┌────────────────────┐
-                  │   FastAPI Backend   │
-                  │---------------------│
-                  │ Authentication      │
-                  │ Dashboard Sync      │
-                  │ Contest Aggregator  │
-                  │ Reminder Service    │
-                  └─────────┬───────────┘
-                            │
-        ┌───────────────────┼───────────────────┐
-        ▼                   ▼                   ▼
-
- ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
- │ MongoDB      │  │ LeetCode API │  │ Codeforces   │
- │ User Data    │  │ GraphQL      │  │ Public API   │
- │ Profiles     │  │              │  │              │
- │ Contests     │  └──────────────┘  └──────────────┘
- │ Reminders    │
- └──────────────┘
-```
 
 ---
 
@@ -72,26 +39,7 @@ Track ratings, solved questions, upcoming contests, and reminders — all from o
 
 ## Frontend Structure
 
-```text
-lib/
-│
-├── pages/
-│   ├── login_page.dart
-│   ├── signup_page.dart
-│   ├── home_page.dart
-│   ├── profile_page.dart
-│   ├── platform_detail.dart
-│   ├── reminder_page.dart
-│   └── settings.dart
-│
-├── services/
-│   └── api_service.dart
-│
-├── provider/
-│   └── theme_provider.dart
-│
-└── main.dart
-```
+<img width="371" height="359" alt="image" src="https://github.com/user-attachments/assets/bf0a0d3e-ccb8-4601-a46d-3e393fe97482" />
 
 ---
 
