@@ -16,7 +16,7 @@ async def get_admin_user(credentials:HTTPAuthorizationCredentials=Depends(securi
     user_id=payload["user_id"]
     user=await user_collection.find_one({"_id":ObjectId(user_id)})
     if not user or not user.get("is_admin",False):
-        raise HTTPException(status_code=403,detail="Admin access required")
+        raise HTTPException(status_code=404,detail="Page not found")
     return user_id
 
 @router.get("/admin/users",response_model=List[UserResponse])

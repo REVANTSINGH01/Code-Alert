@@ -5,6 +5,7 @@ from bson import ObjectId
 from app.auth.auth_handler import create_access_token
 from fastapi.security import HTTPAuthorizationCredentials
 from app.limiter import limiter
+
 from app.auth.auth_handler import(
     verify_token,
     security,
@@ -50,19 +51,19 @@ async def create_user(request:Request,user:UserCreate):
     }
 
 # 2️⃣ LOGIN: Authenticate and return user info + handles
-@router.post("/login",status_code=status.HTTP_201_CREATED)
+@router.post("/login",status_code=status.HTTP_200_CREATED)
 @limiter.limit("10/minute")
 async def login_user(request:Request,user: UserLogin):
     existing_user = await user_collection.find_one({
         "email": user.email, 
-    })
+    }) 
     
     if not existing_user or not verify_password(user.password, existing_user["password"]):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid email or password"
         )
-        
+      
     user_id= str(existing_user["_id"])
     
         
