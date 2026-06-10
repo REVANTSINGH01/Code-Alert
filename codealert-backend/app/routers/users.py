@@ -51,8 +51,8 @@ async def create_user(request:Request,user:UserCreate):
     }
 
 # 2️⃣ LOGIN: Authenticate and return user info + handles
-@router.post("/login",status_code=status.HTTP_200_CREATED)
-@limiter.limit("10/minute")
+@router.post("/login",status_code=status.HTTP_200_OK)
+@limiter.limit("5/minute")
 async def login_user(request:Request,user: UserLogin):
     existing_user = await user_collection.find_one({
         "email": user.email, 
