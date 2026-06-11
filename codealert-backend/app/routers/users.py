@@ -30,7 +30,7 @@ async def create_user(request:Request,user:UserCreate):
     user_dict["password"]=get_password_hash(user.password)
     
     # Initialize an empty handles dictionary for brand new users
-    user_dict["handles"]=None 
+    user_dict["handles"]={}
 
     result=await user_collection.insert_one(user_dict)
     new_user=await user_collection.find_one({"_id":result.inserted_id})
@@ -83,7 +83,7 @@ async def login_user(request:Request,user: UserLogin):
     }
 
 # UPDATE HANDLES: Save the coding platform usernames
-@router.put("/update_user",status_code=status.HTTP_201_CREATED)
+@router.put("/handles",status_code=status.HTTP_201_CREATED)
 @limiter.limit("5/minute")
 async def update_user_handles(request:Request,handles: PlatformHandles,credentials:HTTPAuthorizationCredentials=Depends(security)):
     # Convert incoming handles to a dictionary, ignoring any that were left blank
@@ -95,9 +95,9 @@ async def update_user_handles(request:Request,handles: PlatformHandles,credentia
             detail="Invalid token"
         )
     user_id=payload["user_id"]
-    handles_dict={k:v 
-                  for k,v in handles.model_dump().items()
-                  if v is not None
+    handles_dict={f"handles.{k}":v 
+                for k,v in handles.model_dump().items()
+                if v is not None
     }
     
     if not handles_dict:
@@ -106,7 +106,7 @@ async def update_user_handles(request:Request,handles: PlatformHandles,credentia
     # Update the user's document in MongoDB
     result=await user_collection.update_one(
         {"_id":ObjectId(user_id)},
-        {"$set":{"handles":handles_dict}}
+        {"$set":handles_dict}
     )
 
     if result.matched_count==0:
