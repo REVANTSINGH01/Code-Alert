@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../provider/theme_provider.dart';
 import '../services/api_service.dart';
+import 'main_layout.dart';
 
 class RemindersPage extends StatefulWidget {
   const RemindersPage({super.key});

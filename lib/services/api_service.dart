@@ -47,11 +47,9 @@ class ApiService {
         "username",
         data["user"]["name"],
       );
-<<<<<<< HEAD
 
-=======
       await prefs.setBool("is_admin", data["user"]["is_admin"] ?? false);
->>>>>>> 34ba924ec250ec323875a6c3f7295de5430cdb0f
+
       return data;
 
     } else {
@@ -81,9 +79,8 @@ class ApiService {
     print(response.statusCode,);
     print(response.body,);
     final data = jsonDecode(response.body);
-    if (response.statusCode == 200) {
-<<<<<<< HEAD
-=======
+    if (response.statusCode == 200 || response.statusCode==201) {
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString("token", data["access_token"]);
       if (data["user"] != null) {
@@ -98,8 +95,9 @@ class ApiService {
           is_admin = adminData.toLowerCase() == 'true';
         }
 
-        await prefs.setBool("is_admin", is_admin);      }
->>>>>>> 34ba924ec250ec323875a6c3f7295de5430cdb0f
+        await prefs.setBool("is_admin", is_admin);
+      }
+
       return data;
     } else {
       throw Exception(data["detail"]??"Login Failed",);
@@ -157,7 +155,7 @@ class ApiService {
       body["cc_handle"]=ccHandle;
     }
     final response = await http.put(
-      Uri.parse("$baseUrl/users/handles"),
+      Uri.parse("$baseUrl/handles"),
       headers:{
         "Content-Type":
         "application/json",
@@ -180,14 +178,8 @@ class ApiService {
 
     print(data);
 
-    if(
-    response.statusCode
-        ==
-        200
-    ){
-
+    if(response.statusCode == 200 || response.statusCode == 201) {
       return data;
-
     }
 
     throw Exception(
@@ -248,14 +240,8 @@ class ApiService {
   // =========================
   // DASHBOARD SYNC
   // =========================
-  static Future<Map<String,dynamic>>
-  syncDashboard()
-  async {
-
-    final prefs =
-    await SharedPreferences
-        .getInstance();
-
+  static Future<Map<String,dynamic>> syncDashboard() async {
+    final prefs = await SharedPreferences.getInstance();
     String? token =prefs.getString("token");
     print(token);
     if(token==null) {
@@ -277,29 +263,15 @@ class ApiService {
     print(response.statusCode);
     print(response.body);
     if(response.statusCode==401){
-      await SharedPreferences.getInstance();
       await prefs.clear();
       throw Exception("Session_Expired");
     }
-    final data =
-    jsonDecode(
-        response.body
-    );
-
-    if(
-    response.statusCode
-        ==
-        200
-    ){
-
+    final data = jsonDecode(response.body);
+    if(response.statusCode == 200){
       return data;
-
     }
-
-
     throw Exception(
         data["detail"]
     );
   }
-  
 }
