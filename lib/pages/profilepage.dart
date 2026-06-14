@@ -76,9 +76,9 @@ class _ProfilePage extends State<ProfilePage> with WidgetsBindingObserver {
       setState(() {
         username = prefs.getString("username") ?? "User";
 
-        lcHandle = dashboard["leetcode"]?["handle"];
-        cfHandle = dashboard["codeforces"]?["handle"];
-        ccHandle = dashboard["codechef"]?["handle"];
+        lcHandle = dashboard["leetcode"]?["lc_handle"];
+        cfHandle = dashboard["codeforces"]?["cf_handle"];
+        ccHandle = dashboard["codechef"]?["cc_handle"];
 
         lcRating = dashboard["leetcode"] != null ? double.tryParse(dashboard["leetcode"]["rating"].toString()) : null;
         cfRating = dashboard["codeforces"] != null ? int.tryParse(dashboard["codeforces"]["rating"].toString()) : null;
@@ -144,12 +144,17 @@ class _ProfilePage extends State<ProfilePage> with WidgetsBindingObserver {
                   try {
                     Map<String, String> payload = {apiKey: controller.text.trim()};
                     // TODO: await ApiService.updatePlatformHandles(payload);
-                    if (context.mounted) Navigator.pop(context);
+
                     await loadUser();
+                    if (context.mounted) Navigator.pop(context);
                   } catch (e) {
                     print("Error saving: $e");
-                  } finally {
                     setDialogState(() => isSaving = false);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Failed to update: ${e.toString()}")),
+                      );
+                    }
                   }
                 },
                 child: isSaving
