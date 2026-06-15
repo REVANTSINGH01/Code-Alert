@@ -19,7 +19,7 @@ async def get_lc_profile(user_id:str,
     query = """
     query getUserProfile($username: String!) {
         matchedUser(username: $username) {
-            submitStats {
+            submitStatsGlobal {
                 acSubmissionNum {
                     difficulty
                     count
@@ -51,7 +51,7 @@ async def get_lc_profile(user_id:str,
             # 2. Extract Problems Solved
             # LeetCode returns an array (All, Easy, Medium, Hard). We want "All".
             solved_count = 0
-            submissions = user_data["matchedUser"]["submitStats"]["acSubmissionNum"]
+            submissions = user_data["matchedUser"]["submitStatsGlobal"]["acSubmissionNum"]
             for sub in submissions:
                 if sub["difficulty"] == "All":
                     solved_count = sub["count"]
