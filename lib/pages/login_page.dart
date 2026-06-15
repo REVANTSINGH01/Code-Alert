@@ -52,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
       print(user);
       Navigator.pushReplacementNamed(
         context,
-        '/home_page',
+        '/main_layout',
       );
       print("5 DONE");
 

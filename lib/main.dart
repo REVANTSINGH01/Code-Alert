@@ -11,11 +11,8 @@ import 'package:my_app/pages/reminders.dart';
 import 'package:my_app/pages/login_page.dart';
 import 'package:my_app/pages/sign_up.dart';
 import 'package:my_app/pages/user_setup.dart';
-<<<<<<< HEAD
-=======
 import 'package:my_app/pages/admin_dashboard.dart';
->>>>>>> 34ba924ec250ec323875a6c3f7295de5430cdb0f
-
+import 'package:my_app/pages/main_layout.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   final prefs=await SharedPreferences.getInstance();
@@ -59,15 +56,14 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignupPage(),
         '/login': (context) => const LoginPage(),
         '/user_setup': (context) => const UserSetup(),
-        '/home_page': (context) => HomePage(),
+        '/main_layout': (context) => const MainLayout(),
         '/profilepage': (context) => ProfilePage(),
         '/settings' : (context) => Settings(),
         '/about_app' : (context) => AboutApp(),
         '/reminders' : (context) => RemindersPage(),
-<<<<<<< HEAD
-=======
+
         '/admin_dashboard' : (context) => const AdminDashboardPage(),
->>>>>>> 34ba924ec250ec323875a6c3f7295de5430cdb0f
+
       },
     );
   }
