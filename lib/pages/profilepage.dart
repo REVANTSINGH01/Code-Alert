@@ -140,17 +140,32 @@ class _ProfilePage extends State<ProfilePage> with WidgetsBindingObserver {
                   foregroundColor: Colors.black,
                 ),
                 onPressed: isSaving ? null : () async {
+
                   setDialogState(() => isSaving = true);
                   try {
-                    Map<String, String> payload = {apiKey: controller.text.trim()};
-                    // TODO: await ApiService.updatePlatformHandles(payload);
+                    final newHandle = controller.text.trim();
 
+                    // 1. THIS IS THE FIX: Actually send the data to your backend!
+                    if (apiKey == "lc_handle") {
+                      await ApiService.updateHandles(lcHandle: newHandle);
+                    } else if (apiKey == "cf_handle") {
+                      await ApiService.updateHandles(cfHandle: newHandle);
+                    } else if (apiKey == "cc_handle") {
+                      await ApiService.updateHandles(ccHandle: newHandle);
+                    }
+
+                    // 2. Fetch the newly updated data from the backend
                     await loadUser();
-                    if (context.mounted) Navigator.pop(context);
+
+                    // 3. Close the dialog
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
                   } catch (e) {
                     print("Error saving: $e");
-                    setDialogState(() => isSaving = false);
+
                     if (context.mounted) {
+                      setDialogState(() => isSaving = false);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Failed to update: ${e.toString()}")),
                       );

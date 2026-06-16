@@ -57,7 +57,7 @@ class _PlatformDetail extends State<PlatformDetail>{
 
       Navigator.pushReplacementNamed(
         context,
-        '/home_page',
+        '/main_layout',
       );
 
     } catch (e) {
