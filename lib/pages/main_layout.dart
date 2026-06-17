@@ -12,7 +12,7 @@ class MainLayout extends StatefulWidget {
   State<MainLayout> createState() => _MainLayoutState();
 }
 
-class _MainLayoutState extends State<MainLayout> {
+class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver{
   int _currentIndex = 0;
 
   // The 3 main pages of your app
@@ -31,7 +31,7 @@ class _MainLayoutState extends State<MainLayout> {
     return Scaffold(
       backgroundColor: theme.bgColor,
 
-      // 🔷 IndexedStack keeps all pages alive in memory.
+      resizeToAvoidBottomInset: false,
       // This means your API doesn't reload when you switch tabs!
       body: IndexedStack(
         index: _currentIndex,
@@ -39,31 +39,33 @@ class _MainLayoutState extends State<MainLayout> {
       ),
 
       // 🔷 The permanent Bottom Navigation Bar
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: cardColor,
-        selectedItemColor: const Color(0xFF00E5FF),
-        unselectedItemColor: textColor.withValues(alpha: 0.5),
-        currentIndex: _currentIndex,
-        type: BottomNavigationBarType.fixed,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index; // Instantly swaps the page without flickering
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.alarm),
-            label: "Reminders",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "Profile",
-          ),
-        ],
+      bottomNavigationBar: SafeArea(
+        child: BottomNavigationBar(
+          backgroundColor: cardColor,
+          selectedItemColor: const Color(0xFF00E5FF),
+          unselectedItemColor: textColor.withValues(alpha: 0.5),
+          currentIndex: _currentIndex,
+          type: BottomNavigationBarType.fixed,
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index; // Instantly swaps the page without flickering
+            });
+          },
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_filled),
+              label: "Home",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.alarm),
+              label: "Reminders",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: "Profile",
+            ),
+          ],
+        ) ,
       ),
     );
   }
