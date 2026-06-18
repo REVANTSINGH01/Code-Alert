@@ -10,9 +10,7 @@ class UserSetup extends StatefulWidget {
 }
 
 class _UserState extends State<UserSetup> {
-  // Simulating which platforms are currently connected for the UI
   List<String> connectedPlatforms = ["CodeChef"];
-
   // Global Theme Colors matching the image
   final Color bgColor = const Color(0xFF0F172A);
   final Color cardColor = const Color(0xFF1E293B);
@@ -40,7 +38,7 @@ class _UserState extends State<UserSetup> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // --- Header Section ---
+
                   Text(
                     "Connect\nPlatforms",
                     style: TextStyle(
@@ -115,8 +113,7 @@ class _UserState extends State<UserSetup> {
                         side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                       ),
-                      onPressed: () {
-                        // Skip logic
+                      onPressed: (){
                         Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=> const MainLayout(),),);
                       },
                       child: Text("Skip for Now", style: TextStyle(color: textColor)),
