@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../provider/theme_provider.dart';
 import '../services/api_service.dart';
 import 'dart:async';
-import 'main_layout.dart';
 import '../pages/custom_calendar.dart';
 import '../pages/overlay_page.dart';
 
@@ -52,8 +51,20 @@ class _HomePageState extends State<HomePage> {
         await ApiService.syncDashboard();
       } catch (e) {
         print(e);
+        if (e.toString().contains("Session_Expired")) {
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Session expired. Please log in again."),
+              backgroundColor: Colors.redAccent,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          logout(context);
+        }
       }
-    });
+    }
+    );
   }
 
   Future<void> loadUserData() async {
