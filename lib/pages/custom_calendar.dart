@@ -72,7 +72,6 @@ class _MonthlyCalendarState extends State<MonthlyCalendar> {
     final isDark = widget.cardColor.computeLuminance() < 0.5;
 
     return Container(
-      // 📉 Reduced padding from 20 to 12
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: widget.cardColor,
@@ -85,23 +84,26 @@ class _MonthlyCalendarState extends State<MonthlyCalendar> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 🔷 HEADER
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "Contest Calendar",
-                style: TextStyle(
-                  color: widget.textColor,
-                  fontSize: 14, // 📉 Reduced from 18
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                  child:Text(
+                  "Contest Calendar",
+                  style: TextStyle(
+                    color: widget.textColor,
+                    fontSize: 14, // 📉 Reduced from 18
+                    fontWeight: FontWeight.bold,
+                  ),
+                      overflow: TextOverflow.ellipsis,
                 ),
               ),
               Row(
                 children: [
                   IconButton(
                     icon: Icon(Icons.chevron_left, color: widget.textColor.withValues(alpha: 0.7)),
-                    iconSize: 20, // 📉 Smaller icons
+                    iconSize: 20,
                     onPressed: _previousMonth,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(minWidth: 24, minHeight: 24), // Tighter hit box
@@ -129,9 +131,7 @@ class _MonthlyCalendarState extends State<MonthlyCalendar> {
             ],
           ),
 
-          const SizedBox(height: 12), // 📉 Reduced from 20
-
-          // 🔷 WEEKDAYS ROW
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween, // Distributes evenly without hardcoded widths
             children: _weekdays.map((day) {
@@ -141,7 +141,7 @@ class _MonthlyCalendarState extends State<MonthlyCalendar> {
                     day,
                     style: TextStyle(
                       color: widget.textColor.withValues(alpha: 0.5),
-                      fontSize: 10, // 📉 Reduced from 13
+                      fontSize: 10,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -150,9 +150,7 @@ class _MonthlyCalendarState extends State<MonthlyCalendar> {
             }).toList(),
           ),
 
-          const SizedBox(height: 8), // 📉 Reduced from 12
-
-          // 🔷 CALENDAR GRID
+          const SizedBox(height: 8),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -160,8 +158,8 @@ class _MonthlyCalendarState extends State<MonthlyCalendar> {
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 7,
               childAspectRatio: 1.0,
-              mainAxisSpacing: 2, // 📉 Tighter vertical spacing
-              crossAxisSpacing: 2, // 📉 Tighter horizontal spacing
+              mainAxisSpacing: 2,
+              crossAxisSpacing: 2,
             ),
             itemBuilder: (context, index) {
               final date = days[index];
