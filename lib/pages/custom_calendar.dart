@@ -25,197 +25,266 @@ class _MonthlyCalendarState extends State<MonthlyCalendar> {
   late DateTime _selectedDate;
 
   final List<String> _monthNames = [
-    'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-    'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
+    'JAN',
+    'FEB',
+    'MAR',
+    'APR',
+    'MAY',
+    'JUN',
+    'JUL',
+    'AUG',
+    'SEP',
+    'OCT',
+    'NOV',
+    'DEC'
   ];
 
-  final List<String> _weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  final List<String> _weekdays = [
+    'S',
+    'M',
+    'T',
+    'W',
+    'T',
+    'F',
+    'S'
+  ];
 
   @override
   void initState() {
     super.initState();
-    DateTime now = DateTime.now();
+    final now = DateTime.now();
     _displayedMonth = DateTime(now.year, now.month, 1);
-    _selectedDate = DateTime(now.year, now.month, now.day);
+    _selectedDate = now;
   }
 
   void _previousMonth() {
     setState(() {
-      _displayedMonth = DateTime(_displayedMonth.year, _displayedMonth.month - 1, 1);
+      _displayedMonth =
+          DateTime(_displayedMonth.year, _displayedMonth.month - 1, 1);
     });
   }
 
   void _nextMonth() {
     setState(() {
-      _displayedMonth = DateTime(_displayedMonth.year, _displayedMonth.month + 1, 1);
+      _displayedMonth =
+          DateTime(_displayedMonth.year, _displayedMonth.month + 1, 1);
     });
   }
 
   List<DateTime> _generateCalendarDays() {
-    final firstDayOfMonth = DateTime(_displayedMonth.year, _displayedMonth.month, 1);
-    int startOffset = firstDayOfMonth.weekday % 7;
-    final firstDayOfGrid = firstDayOfMonth.subtract(Duration(days: startOffset));
-    return List.generate(42, (index) => firstDayOfGrid.add(Duration(days: index)));
+    final firstDay =
+    DateTime(_displayedMonth.year, _displayedMonth.month, 1);
+
+    final startOffset = firstDay.weekday % 7;
+
+    final firstGridDay =
+    firstDay.subtract(Duration(days: startOffset));
+
+    return List.generate(
+      42,
+          (index) => firstGridDay.add(Duration(days: index)),
+    );
   }
 
   bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
+    return a.year == b.year &&
+        a.month == b.month &&
+        a.day == b.day;
   }
 
   bool _hasContest(DateTime date) {
-    return widget.contestDates.any((contestDate) => _isSameDay(contestDate, date));
+    return widget.contestDates.any(
+          (contestDate) => _isSameDay(contestDate, date),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final days = _generateCalendarDays();
-    final isDark = widget.cardColor.computeLuminance() < 0.5;
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: widget.cardColor,
-        // 📉 Scaled down border radius
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.withValues(alpha: 0.2),
+    final isDark =
+        widget.cardColor.computeLuminance() < 0.5;
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: 420,
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: widget.cardColor,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.grey.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
-                  child:Text(
-                  "Contest Calendar",
-                  style: TextStyle(
-                    color: widget.textColor,
-                    fontSize: 14, // 📉 Reduced from 18
-                    fontWeight: FontWeight.bold,
-                  ),
-                      overflow: TextOverflow.ellipsis,
-                ),
-              ),
+              //------------------------------------
+              // HEADER
+              //------------------------------------
               Row(
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.chevron_left, color: widget.textColor.withValues(alpha: 0.7)),
-                    iconSize: 20,
-                    onPressed: _previousMonth,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 24, minHeight: 24), // Tighter hit box
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    "${_monthNames[_displayedMonth.month - 1]} ${_displayedMonth.year}",
-                    style: TextStyle(
-                      color: widget.textColor.withValues(alpha: 0.9),
-                      fontSize: 10, // 📉 Reduced from 13
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.0,
+                  Expanded(
+                    child: Text(
+                      "Contest Calendar",
+                      style: TextStyle(
+                        color: widget.textColor,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  IconButton(
-                    icon: Icon(Icons.chevron_right, color: widget.textColor.withValues(alpha: 0.7)),
-                    iconSize: 20, // 📉 Smaller icons
-                    onPressed: _nextMonth,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: _previousMonth,
+                        icon: Icon(
+                          Icons.chevron_left,
+                          color: widget.textColor,
+                        ),
+                        iconSize: 18,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minHeight: 24,
+                          minWidth: 24,
+                        ),
+                      ),
+                      Text(
+                        "${_monthNames[_displayedMonth.month - 1]} ${_displayedMonth.year}",
+                        style: TextStyle(
+                          color: widget.textColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: _nextMonth,
+                        icon: Icon(
+                          Icons.chevron_right,
+                          color: widget.textColor,
+                        ),
+                        iconSize: 18,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minHeight: 24,
+                          minWidth: 24,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
 
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween, // Distributes evenly without hardcoded widths
-            children: _weekdays.map((day) {
-              return Expanded(
-                child: Center(
-                  child: Text(
-                    day,
-                    style: TextStyle(
-                      color: widget.textColor.withValues(alpha: 0.5),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
+              const SizedBox(height: 6),
 
-          const SizedBox(height: 8),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: 42,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 7,
-              childAspectRatio: 1.0,
-              mainAxisSpacing: 2,
-              crossAxisSpacing: 2,
-            ),
-            itemBuilder: (context, index) {
-              final date = days[index];
-              final isCurrentMonth = date.month == _displayedMonth.month;
-              final isSelected = _isSameDay(date, _selectedDate);
-              final hasEvent = _hasContest(date);
-
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedDate = date;
-                  });
-                  widget.onDateSelected(date);
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? widget.accentColor.withValues(alpha: 0.2)
-                        : Colors.transparent,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        date.day.toString(),
+              //------------------------------------
+              // WEEKDAYS
+              //------------------------------------
+              Row(
+                children: _weekdays.map((day) {
+                  return Expanded(
+                    child: Center(
+                      child: Text(
+                        day,
                         style: TextStyle(
-                          color: isSelected
-                              ? widget.accentColor
-                              : isCurrentMonth
-                              ? widget.textColor
-                              : widget.textColor.withValues(alpha: 0.3),
-                          fontSize: 11, // 📉 Reduced from 14
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                          color: widget.textColor.withValues(alpha: 0.5),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      if (hasEvent) ...[
-                        const SizedBox(height: 1),
-                        Container(
-                          width: 3, // 📉 Smaller neon dot
-                          height: 3,
-                          decoration: BoxDecoration(
-                            color: widget.accentColor,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ] else ...[
-                        const SizedBox(height: 4),
-                      ]
-                    ],
-                  ),
+                    ),
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 4),
+
+              //------------------------------------
+              // DAYS GRID
+              //------------------------------------
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: 42,
+                gridDelegate:
+                const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 7,
+                  childAspectRatio: 1.9,
+                  crossAxisSpacing: 2,
+                  mainAxisSpacing: 2,
                 ),
-              );
-            },
+                itemBuilder: (context, index) {
+                  final date = days[index];
+
+                  final isCurrentMonth =
+                      date.month == _displayedMonth.month;
+
+                  final isSelected =
+                  _isSameDay(date, _selectedDate);
+
+                  final hasEvent = _hasContest(date);
+
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedDate = date;
+                      });
+
+                      widget.onDateSelected(date);
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isSelected
+                            ? widget.accentColor
+                            .withValues(alpha: 0.20)
+                            : Colors.transparent,
+                      ),
+                      child: Column(
+                        mainAxisAlignment:
+                        MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            date.day.toString(),
+                            style: TextStyle(
+                              color: isSelected
+                                  ? widget.accentColor
+                                  : isCurrentMonth
+                                  ? widget.textColor
+                                  : widget.textColor
+                                  .withValues(alpha: 0.3),
+                              fontSize: 11,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                          if (hasEvent)
+                            Container(
+                              margin:
+                              const EdgeInsets.only(top: 1),
+                              width: 3,
+                              height: 3,
+                              decoration: BoxDecoration(
+                                color: widget.accentColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
