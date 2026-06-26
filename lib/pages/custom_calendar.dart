@@ -215,7 +215,7 @@ class _MonthlyCalendarState extends State<MonthlyCalendar> {
                 gridDelegate:
                 const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 7,
-                  childAspectRatio: 1.9,
+                  childAspectRatio: 1.0,
                   crossAxisSpacing: 2,
                   mainAxisSpacing: 2,
                 ),

@@ -225,16 +225,18 @@ class _HomePageState extends State<HomePage> {
                 "Upcoming Contests",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                child: MonthlyCalendar(
-                  cardColor: cardColor,
-                  textColor: textColor,
-                  accentColor: const Color(0xFF00E5FF),
-                  contestDates: myContestDates,
-                  onDateSelected: (date) {
-                    print("Selected: $date");
-                  },
+              Center(
+                child: SizedBox(
+                  width: 320,
+                  child: MonthlyCalendar(
+                    cardColor: cardColor,
+                    textColor: textColor,
+                    accentColor: const Color(0xFF00E5FF),
+                    contestDates: myContestDates,
+                    onDateSelected: (date) {
+                      print("Selected: $date");
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 20),

@@ -29,7 +29,7 @@ void main() async{
   String? token=prefs.getString("token");
   Widget startPage;
   if (token != null) {
-    startPage = HomePage();
+    startPage = MainLayout();
   } else {
     startPage = LoginPage();
   }

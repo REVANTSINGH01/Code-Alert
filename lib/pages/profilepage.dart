@@ -55,10 +55,19 @@ class _ProfilePage extends State<ProfilePage> with WidgetsBindingObserver {
     );
   }
 
+  DateTime _lastSyncTime = DateTime.now().subtract(const Duration(minutes: 5));
+
+  // ...
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (mounted) loadUser(showLoader: false);
+      // Check if at least 1 minute has passed since the last sync
+      final now = DateTime.now();
+      if (now.difference(_lastSyncTime).inMinutes >= 1) {
+        _lastSyncTime = now;
+        if (mounted) loadUser(showLoader: false);
+      }
     }
   }
 
