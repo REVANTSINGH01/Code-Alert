@@ -83,7 +83,7 @@ class _SignupPageState extends State<SignupPage> {
               controller: nameController,
 
               decoration: const InputDecoration(
-                labelText: "Name",
+                labelText: "UserName",
               ),
             ),
 
