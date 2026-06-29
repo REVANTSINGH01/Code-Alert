@@ -35,6 +35,15 @@ Track ratings, solved questions, upcoming contests, and reminders — all from o
 
 ---
 
+---
+
+# 📖 Use Case Diagram
+
+## User Interactions
+
+
+---
+
 # ⚙️ Low Level Design (LLD)
 
 ## Frontend Structure
