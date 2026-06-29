@@ -1,3 +1,4 @@
+<img width="2224" height="1146" alt="mermaid-diagram-2026-06-29-233949" src="https://github.com/user-attachments/assets/5a3d561c-541b-41e8-bea3-e0024c83da45" />
 # 🚀 CodeAlert
 ### Competitive Programming Tracker & Contest Reminder
 
@@ -39,8 +40,7 @@ Track ratings, solved questions, upcoming contests, and reminders — all from o
 
 # 📖 Use Case Diagram
 
-## User Interactions
-
+<img width="2224" height="1146" alt="mermaid-diagram-2026-06-29-233949" src="https://github.com/user-attachments/assets/0a39eca0-b285-45fa-8d6a-80ad3b79fa95" />
 
 ---
 
