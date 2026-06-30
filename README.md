@@ -76,6 +76,14 @@ backend/
 ```
 
 ---
+# 🗄️ Entity Relationship Diagram (ER Diagram)
+
+The following diagram illustrates the logical relationships between the MongoDB collections used in CodeAlert.
+
+<img width="2567" height="1260" alt="mermaid-diagram-2026-06-30-235804" src="https://github.com/user-attachments/assets/2b6e8df4-2085-4e9b-918c-69e9c6125654" />
+
+
+---
 
 # 🧩 System Architecture
 
