@@ -80,7 +80,7 @@ backend/
 
 The following diagram illustrates the logical relationships between the MongoDB collections used in CodeAlert.
 
-<img width="2567" height="1260" alt="mermaid-diagram-2026-06-30-235804" src="https://github.com/user-attachments/assets/2b6e8df4-2085-4e9b-918c-69e9c6125654" />
+<img width="3042" height="1345" alt="mermaid-diagram-2026-07-01-000044" src="https://github.com/user-attachments/assets/3e976957-3b2e-474e-b7ee-e2192513d21b" />
 
 
 ---
