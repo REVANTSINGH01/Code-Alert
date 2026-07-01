@@ -91,15 +91,15 @@ async def sync_user_dashboard(
 
         cf_data = await cf_profile_collection.find_one(
             {"user_id": user_id}
-        )
+        ) if handles.get("cf_handle") else None
 
         lc_data = await lc_profile_collection.find_one(
             {"user_id": user_id}
-        )
+        ) if handles.get("lc_handle") else None
 
         cc_data = await cc_profile_collection.find_one(
             {"user_id": user_id}
-        )
+        ) if handles.get("cc_handle") else None
 
         for d in [cf_data, lc_data, cc_data]:
             if d:

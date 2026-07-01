@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List # Ensure Optional is here
 from typing import Optional, List
+from datetime import datetime
 from pydantic import BaseModel
 
 class UserUpdatePassword(BaseModel):
@@ -10,6 +11,15 @@ class UserUpdatePassword(BaseModel):
 class AdminChangePassword(BaseModel):
     new_password:str
 
+class OTPRecordDB(BaseModel):
+    email: str
+    otp: str
+    expires_at: datetime
+
+class ResetTokenRecordDB(BaseModel):
+    token: str
+    email: str
+    expires_at: datetime
 
 # ---- REMINDER SCHEMAS ----
 class ReminderCreate(BaseModel):

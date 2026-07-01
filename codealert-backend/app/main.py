@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import codechef, codeforces, contests, dashboard, leetcode, reminders
+from app.routers import codechef, codeforces, contests, dashboard, leetcode, reminders, auth
 from app.routers import users
 from app.routers import admin
 from slowapi import _rate_limit_exceeded_handler
@@ -31,6 +31,7 @@ app.include_router(codeforces.router)
 app.include_router(leetcode.router)
 app.include_router(codechef.router)
 app.include_router(dashboard.router)
+app.include_router(auth.router)
 
 @app.get("/")
 def root():
