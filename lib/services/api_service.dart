@@ -245,10 +245,7 @@
         throw Exception(data["detail"]);
       }
     }
-  
-    // =========================
-    // DASHBOARD SYNC
-    // =========================
+
     static Future<Map<String,dynamic>> syncDashboard() async {
       final prefs = await SharedPreferences.getInstance();
       String? token =prefs.getString("token");
@@ -282,5 +279,54 @@
       throw Exception(
           data["detail"]
       );
+    }
+
+    static Future<Map<String, dynamic>> requestPasswordReset(String email) async {
+      final response = await http.post(
+        Uri.parse("$baseUrl/forgot-password"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email}),
+      ).timeout(const Duration(seconds: 15));
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return data;
+      } else {
+        throw Exception(data["detail"] ?? "Failed to send reset code");
+      }
+    }
+
+    static Future<String> verifyOtp({required String email, required String otp}) async {
+      final response = await http.post(
+        Uri.parse("$baseUrl/verify-otp"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email, "otp": otp}),
+      ).timeout(const Duration(seconds: 15));
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Return the reset token so the next screen can use it!
+        return data["access_token"];
+      } else {
+        throw Exception(data["detail"] ?? "Invalid OTP");
+      }
+    }
+
+    static Future<Map<String, dynamic>> resetPassword({required String token, required String newPassword}) async {
+      final response = await http.post(
+        Uri.parse("$baseUrl/reset-password"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"token": token, "new_password": newPassword}),
+      ).timeout(const Duration(seconds: 15));
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return data;
+      } else {
+        throw Exception(data["detail"] ?? "Failed to reset password");
+      }
     }
   }
