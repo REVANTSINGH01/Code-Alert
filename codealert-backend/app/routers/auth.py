@@ -4,11 +4,12 @@ import smtplib
 import uuid
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from passlib.context import CryptContext
-from database import user_collection, otp_collection, tokens_collection
+from app.database.database import user_collection, otp_collection, tokens_collection
+from app.main import limiter 
 
 load_dotenv()
 router = APIRouter(tags=["Authentication"])
@@ -30,7 +31,6 @@ class ResetPasswordRequest(BaseModel):
     new_password: str
 
 def send_otp_email(email_to: str, otp: str):
-
     sender_email = os.getenv("SENDER_EMAIL")
     sender_password = os.getenv("SENDER_PASSWORD")
     
@@ -52,32 +52,33 @@ def send_otp_email(email_to: str, otp: str):
         print(f"Failed to send email: {e}")
 
 @router.post("/forgot-password")
-async def forgot_password(request: ForgotPasswordRequest, background_tasks: BackgroundTasks):
+@limiter.limit("3/minute")
+async def forgot_password(request: Request, payload: ForgotPasswordRequest, background_tasks: BackgroundTasks):
 
-    user = await user_collection.find_one({"email": request.email})
+    user = await user_collection.find_one({"email": payload.email})
     if not user:
         return {"message": "If that email exists, an OTP has been sent."}
 
-
-    await otp_collection.delete_many({"email": request.email})
+    await otp_collection.delete_many({"email": payload.email})
 
     otp_code = str(random.randint(100000, 999999))
     new_otp = {
-        "email": request.email,
+        "email": payload.email,
         "otp": otp_code,
         "expires_at": datetime.now() + timedelta(minutes=10)
     }
     await otp_collection.insert_one(new_otp)
-    background_tasks.add_task(send_otp_email, request.email, otp_code)
+    background_tasks.add_task(send_otp_email, payload.email, otp_code)
     
     return {"message": "If that email exists, an OTP has been sent."}
 
 @router.post("/verify-otp")
-async def verify_otp(request: VerifyOTPRequest):
+@limiter.limit("5/minute")
+async def verify_otp(request: Request, payload: VerifyOTPRequest):
 
     record = await otp_collection.find_one({
-        "email": request.email,
-        "otp": request.otp
+        "email": payload.email,
+        "otp": payload.otp
     })
 
     if not record:
@@ -90,7 +91,7 @@ async def verify_otp(request: VerifyOTPRequest):
     reset_token = str(uuid.uuid4())
     new_token_record = {
         "token": reset_token,
-        "email": request.email,
+        "email": payload.email,
         "expires_at": datetime.now() + timedelta(minutes=15)
     }
     await tokens_collection.insert_one(new_token_record)
@@ -100,8 +101,9 @@ async def verify_otp(request: VerifyOTPRequest):
     return {"access_token": reset_token, "message": "OTP Verified"}
 
 @router.post("/reset-password")
-async def reset_password(request: ResetPasswordRequest):
-    record = await tokens_collection.find_one({"token": request.token})
+@limiter.limit("3/minute")
+async def reset_password(request: Request, payload: ResetPasswordRequest):
+    record = await tokens_collection.find_one({"token": payload.token})
 
     if not record:
         raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
@@ -110,11 +112,11 @@ async def reset_password(request: ResetPasswordRequest):
         await tokens_collection.delete_one({"_id": record["_id"]})
         raise HTTPException(status_code=400, detail="Reset token has expired.")
 
-    new_hashed_password = get_password_hash(request.new_password)
+    new_hashed_password = get_password_hash(payload.new_password)
     
     update_result = await user_collection.update_one(
         {"email": record["email"]}, 
-        {"$set": {"hashed_password": new_hashed_password}}
+        {"$set": {"password": new_hashed_password}}
     )
 
     if update_result.modified_count == 0:
