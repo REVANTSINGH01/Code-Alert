@@ -4,9 +4,9 @@ import httpx
 from bs4 import BeautifulSoup
 from app.database.database import cc_profile_collection
 from app.schemas.schemas import CCProfileResponse
-import re # <-- We are using Regex now!
+import re 
 from app.auth.auth_handler import (
-    verify_token,
+    verify_access_token,
     security
 )
 

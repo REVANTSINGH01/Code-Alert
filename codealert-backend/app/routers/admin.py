@@ -2,7 +2,7 @@ from fastapi import APIRouter,HTTPException,Depends,status
 from fastapi.security import HTTPAuthorizationCredentials
 from bson import ObjectId
 from typing import List
-from app.auth.auth_handler import verify_token,security,get_password_hash
+from app.auth.auth_handler import verify_access_token,security,get_password_hash
 from app.database.database import user_collection,reminder_collection
 from app.schemas.schemas import UserResponse
 
@@ -10,7 +10,7 @@ router=APIRouter(tags=["Admin"])
 
 async def get_admin_user(credentials:HTTPAuthorizationCredentials=Depends(security)):
     token=credentials.credentials
-    payload=verify_token(token)
+    payload=verify_access_token(token)
     if payload is None:
         raise HTTPException(status_code=401,detail="Invalid token")
     user_id=payload["user_id"]

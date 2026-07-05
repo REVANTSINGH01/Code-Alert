@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPAuthorizationCredentials
-from app.auth.auth_handler import verify_token, security
+from app.auth.auth_handler import verify_access_token, security
 from app.schemas.schemas import DashboardResponse
 from app.database.database import (
     user_collection,
@@ -26,7 +26,7 @@ async def sync_user_dashboard(
     try:
 
         token = credentials.credentials
-        payload = verify_token(token)
+        payload = verify_access_token(token)
 
         if payload is None:
             raise HTTPException(

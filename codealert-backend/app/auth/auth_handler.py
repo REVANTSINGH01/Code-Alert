@@ -1,15 +1,25 @@
+import uuid
 from jose import jwt,JWTError
-from datetime import datetime,timedelta
+from datetime import datetime,timedelta,timezone
 import secrets
-from fastapi.security import HTTPBearer
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer,HTTPAuthorizationCredentials
 from passlib.context import CryptContext
+from typing import Optional
 import os
 from dotenv import load_dotenv
-
+from app.database.database import database
 load_dotenv()
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM="HS256" 
+ACCESS_TOKEN_EXPIRY_MINUTES=os.getenv("ACCESS_EXPIRY")
+REFRESH_TOKEN_EXPIRY_DAYS= os.getenv("REFRESH_EXPIRY")
 
 security=HTTPBearer()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def refresh_col():
+    return database["refresh_tokens"]
 
 def get_password_hash(password: str) -> str:
     """Hashes a plain-text password."""
@@ -22,31 +32,79 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(truncated_password, hashed_password)
 
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM="HS256" 
-ACCESS_TOKEN_EXPIRY=60
+def create_access_token(user_id:str) ->str:
+    expire=datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRY_MINUTES)
+    payload={
+        "sub":user_id,
+        "exp":expire,
+        "iat":datetime.now(timezone.utc),
+        "type":"access",
+    }
+    return jwt.encode(payload,SECRET_KEY,algorithm=ALGORITHM)
 
-
-def create_access_token(data:dict):
-    to_encode=data.copy();
-    expire=datetime.utcnow() + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRY
-    )
-    to_encode.update({"exp":expire})
-    encoded_jwt=jwt.encode(
-        to_encode,
-        SECRET_KEY,
-        algorithm=ALGORITHM
-    )
-    return encoded_jwt
-
-def  verify_token(token:str):
+def  verify_access_token(token:str):
     try:
-        payload=jwt.decode(
-            token,
-            SECRET_KEY,
-            algorithms=[ALGORITHM]
-        )
+        payload=jwt.decode(token,SECRET_KEY,algorithms=[ALGORITHM])
+        if(payload.get("type"))!="access":
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid token type")
         return payload
     except JWTError:
-        return None
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,detail="Access token is invalid or expired",headers={"WWW-Authenticate":"Bearer"},
+        )
+
+async def create_refresh_token(user_id:str,device_hint: Optional[str]=None):
+    token=str(uuid.uuid4())
+    expires_at=datetime.now(timezone.utc)+timedelta(days=REFRESH_TOKEN_EXPIRY_DAYS)
+
+    doc={
+        "token":token,
+        "user_id":user_id,
+        "expires_at":expires_at,
+        "revoked":False,
+        "created_at":datetime.now(timezone.utc),
+        "device_hint":device_hint,
+    }
+    await refresh_col().insert_one(doc)
+    return token
+
+async def valid_refresh_token(token:str):
+    doc=await refresh_col().find_one({"token":token})
+
+    if not doc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Refresh token not found")
+    if doc["revoked"]:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Refresh token has been revoked")
+    expires_at=doc["expires_at"]
+    if expires_at.tzinfo is None:
+        expires_at=expires_at.replace(tzinfo=timezone.utc)
+    
+    if expires_at<datetime.now(timezone.utc):
+        await refresh_col().delete_one({"token":token})
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Refresh token has expired, please log in again")
+    return doc["user_id"]
+
+async def rotate_refresh_token(old_token:str,device_hint: Optional[str]=None):
+    await refresh_col().update_one(
+        {"token":old_token},
+        {"$set":{"revoked":True,"revoked_at":datetime.now(timezone.utc)}}
+    )
+
+    old_doc=await refresh_col().find_one({"token":old_token})
+    user_id=old_doc["user_id"]
+
+    new_token=await create_refresh_token(user_id,device_hint)
+    return new_token
+async def revoke_refresh_token(token:str):
+    result= await refresh_col().update_one(
+        {"token":token},
+        {"$set": {"revoked": True, "revoked_at": datetime.now(timezone.utc)}}
+    )
+
+async def revoke_all_refresh_tokens(user_id: str) -> int:
+    
+    result = await refresh_col().update_many(
+        {"user_id": user_id, "revoked": False},
+        {"$set": {"revoked": True, "revoked_at": datetime.now(timezone.utc)}}
+    )
+    return result.modified_count

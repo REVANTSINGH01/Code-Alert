@@ -7,7 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 from app.limiter import limiter
 
 from app.auth.auth_handler import(
-    verify_token,
+    verify_access_token,
     security,
     get_password_hash,
     verify_password
@@ -88,7 +88,7 @@ async def login_user(request:Request,user: UserLogin):
 async def update_user_handles(request:Request,handles: PlatformHandles,credentials:HTTPAuthorizationCredentials=Depends(security)):
     # Convert incoming handles to a dictionary, ignoring any that were left blank
     token= credentials.credentials
-    payload=verify_token(token)
+    payload=verify_access_token(token)
     if payload is None:
         raise HTTPException(
             status_code=401,
@@ -119,7 +119,7 @@ async def update_user_handles(request:Request,handles: PlatformHandles,credentia
 @limiter.limit("5/minute")
 async def update_user_password(request:Request,data:UserUpdatePassword,credentials:HTTPAuthorizationCredentials=Depends(security)):
     token=credentials.credentials
-    payload=verify_token(token)
+    payload=verify_access_token(token)
     if payload is None:
         raise HTTPException(status_code=401,detail="Invalid token")
     user_id=payload["user_id"]

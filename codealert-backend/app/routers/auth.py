@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from passlib.context import CryptContext
 from app.database.database import user_collection, otp_collection, tokens_collection
-from app.main import limiter 
+from app.limiter import limiter 
 
 load_dotenv()
 router = APIRouter(tags=["Authentication"])

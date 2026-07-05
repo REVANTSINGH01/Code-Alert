@@ -4,7 +4,7 @@ from app.schemas.schemas import CFProfileResponse
 from app.database.database import cf_profile_collection
 import httpx
 from app.auth.auth_handler import (
-    verify_token,
+    verify_access_token,
     security
 )
 

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status,Depends
 from fastapi.security import HTTPAuthorizationCredentials
 from app.auth.auth_handler import (
-    verify_token,
+    verify_access_token,
     security
 )
 from typing import List
@@ -14,7 +14,7 @@ router = APIRouter(tags=["Reminders"])
 @router.post("/reminder", response_model=ReminderResponse, status_code=status.HTTP_201_CREATED)
 async def create_reminder(reminder: ReminderCreate,credentials :HTTPAuthorizationCredentials=Depends(security)):
     token =credentials.credentials
-    payload=verify_token(token)
+    payload=verify_access_token(token)
     if payload is None:
         raise HTTPException(
             status_code=401,
@@ -39,7 +39,7 @@ async def create_reminder(reminder: ReminderCreate,credentials :HTTPAuthorizatio
 @router.get("/reminders/", response_model=List[ReminderResponse])
 async def get_user_reminders(credentials:HTTPAuthorizationCredentials=Depends(security)):
     token=credentials.credentials
-    payload=verify_token(token)
+    payload=verify_access_token(token)
     if payload is None:
         raise HTTPException(
             status_code=401,
@@ -63,7 +63,7 @@ async def get_user_reminders(credentials:HTTPAuthorizationCredentials=Depends(se
 async def delete_reminder(reminder_id: str,credentials:HTTPAuthorizationCredentials=Depends(security)):
     # Check if the ID format is valid for MongoDB
     token = credentials.credentials
-    payload = verify_token(token)
+    payload = verify_access_token(token)
 
     if payload is None:
         raise HTTPException(status_code=401, detail="Invalid token")

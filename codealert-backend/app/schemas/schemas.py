@@ -1,8 +1,21 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, List # Ensure Optional is here
 from typing import Optional, List
 from datetime import datetime
-from pydantic import BaseModel
+import os 
+from dotenv import load_dotenv
+load_dotenv()
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    access_expires_in: int = int(os.getenv("ACCESS_EXPIRY"))*60         
+    refresh_expires_in: int =int(os.getenv("REFRESH_EXPIRY"))* 24*60*60
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+class LogoutRequest(BaseModel):
+    refresh_token: str
 
 class UserUpdatePassword(BaseModel):
     old_password:str
@@ -21,7 +34,6 @@ class ResetTokenRecordDB(BaseModel):
     email: str
     expires_at: datetime
 
-# ---- REMINDER SCHEMAS ----
 class ReminderCreate(BaseModel):
     contest_name: str
     reminder_time: str
@@ -47,7 +59,7 @@ class CFProfileResponse(BaseModel):
 
 class LCProfileResponse(BaseModel):
     lc_handle: str
-    rating: float          # LeetCode uses decimals for ratings
+    rating: float
     global_ranking: int
     problems_solved: int
     
@@ -75,6 +87,10 @@ class UserResponse(BaseModel):
     handles:Optional[PlatformHandles]=None
     is_admin:bool=False
 
+class UserLoginResponse(BaseModel):
+    user: UserResponse
+    tokens: TokenResponse
+
 class CCProfileResponse(BaseModel):
     cc_handle: str
     rating: int
@@ -86,11 +102,9 @@ class DashboardResponse(BaseModel):
     codeforces: Optional[CFProfileResponse] = None
     leetcode: Optional[LCProfileResponse] = None
     codechef: Optional[CCProfileResponse] = None
-    
 
 class UserUpdate(BaseModel):
     name:Optional[str]=None
     password:Optional[str]=None
     handles: Optional[PlatformHandles] = None
-# ---- USER SCHEMAS ----
 
