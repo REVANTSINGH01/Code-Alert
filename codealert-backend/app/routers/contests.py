@@ -1,19 +1,24 @@
 from fastapi import APIRouter, HTTPException
 from app.schemas.schemas import ContestResponse
 from typing import List
-import requests
+import httpx
+import asyncio
 import datetime
 
 router = APIRouter(tags=["Contests"])
 
 @router.get("/contests", response_model=List[ContestResponse])
-def get_contest():
+async def get_contest():
     contests=[]
-    contests.extend(get_cf_contests())
-
-    contests.extend(get_cc_contests())
-
-    contests.extend(get_lc_contests())
+    async with httpx.AsyncClient(timeout=10.0) as client:    
+        cf, cc, lc = await asyncio.gather(
+        get_cf_contests(client),
+        get_cc_contests(client),
+        get_lc_contests(client),
+        )
+    contests.extend(cf)
+    contests.extend(cc)
+    contests.extend(lc)
 
     contests.sort(
         key=lambda x:
@@ -23,12 +28,13 @@ def get_contest():
 
 
 
-def get_cf_contests():
+async def get_cf_contests(client: httpx.AsyncClient):
     url = "https://codeforces.com/api/contest.list"
     
     try:
         # Fetch data from Codeforces
-        response = requests.get(url)
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(url)
         data = response.json()
         
         if data["status"] != "OK":
@@ -64,7 +70,7 @@ def get_cf_contests():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-def get_lc_contests():
+async def get_lc_contests(client: httpx.AsyncClient):
     url= "https://leetcode.com/graphql"
 
     query = """
@@ -82,7 +88,8 @@ def get_lc_contests():
     """
 
     try:
-        response=requests.post(url, json={"query":query})
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(url,json={"query": query})
         data=response.json()
         now =datetime.datetime.now(datetime.timezone.utc)
         three_days=(now+datetime.timedelta(days=7))
@@ -110,10 +117,11 @@ def get_lc_contests():
     except Exception as e:
         raise HTTPException (status_code=500,detail=str(e))
     
-def get_cc_contests():
+async def get_cc_contests(client: httpx.AsyncClient):
     url="https://www.codechef.com/api/list/contests/all"
     try: 
-        response=requests.get(url)
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(url)
         data=response.json()
         if data["status"] != "success":
             raise HTTPException(status_code=400, detail="Failed to fetch from CodeChef")

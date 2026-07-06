@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers import codechef, codeforces, contests, dashboard, leetcode, reminders, auth
 from app.routers import users
 from app.routers import admin
+from app.auth.auth_handler import setup_refresh_token_indexes
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from app.limiter import limiter
@@ -20,7 +21,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app=FastAPI()
 app.state.limiter=limiter
 app.add_exception_handler(RateLimitExceeded,_rate_limit_exceeded_handler)
 app.include_router(admin.router)
@@ -30,8 +30,12 @@ app.include_router(reminders.router)
 app.include_router(codeforces.router)
 app.include_router(leetcode.router)
 app.include_router(codechef.router)
-app.include_router(dashboard.router)
+app.include_router(dashboard.router)     
 app.include_router(auth.router)
+
+@app.on_event("startup")
+async def startup():
+    await setup_refresh_token_indexes()
 
 @app.get("/")
 def root():

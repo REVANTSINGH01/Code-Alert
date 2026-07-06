@@ -12,8 +12,8 @@ from app.database.database import database
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM="HS256" 
-ACCESS_TOKEN_EXPIRY_MINUTES=os.getenv("ACCESS_EXPIRY")
-REFRESH_TOKEN_EXPIRY_DAYS= os.getenv("REFRESH_EXPIRY")
+ACCESS_TOKEN_EXPIRY_MINUTES=int(os.getenv("ACCESS_EXPIRY"))
+REFRESH_TOKEN_EXPIRY_DAYS=int(os.getenv("REFRESH_EXPIRY"))
 
 security=HTTPBearer()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -68,7 +68,7 @@ async def create_refresh_token(user_id:str,device_hint: Optional[str]=None):
     await refresh_col().insert_one(doc)
     return token
 
-async def valid_refresh_token(token:str):
+async def validate_refresh_token(token:str):
     doc=await refresh_col().find_one({"token":token})
 
     if not doc:
@@ -108,3 +108,31 @@ async def revoke_all_refresh_tokens(user_id: str) -> int:
         {"$set": {"revoked": True, "revoked_at": datetime.now(timezone.utc)}}
     )
     return result.modified_count
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security),) -> str:
+    token = credentials.credentials
+    payload = verify_access_token(token)
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token payload missing user id",
+        )
+    return user_id
+
+async def setup_refresh_token_indexes():
+    col = refresh_col()
+
+    await col.create_index(
+        "expires_at",
+        expireAfterSeconds=0
+    )
+
+    await col.create_index(
+        "token",
+        unique=True
+    )
+
+    await col.create_index(
+        "user_id"
+    )
