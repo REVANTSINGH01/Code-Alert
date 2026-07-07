@@ -31,14 +31,18 @@
   
       final data = jsonDecode(response.body);
   
-      if (response.statusCode == 201) {
+      if (response.statusCode==200 || response.statusCode == 201) {
   
         final prefs =
         await SharedPreferences
             .getInstance();
         await prefs.setString(
-          "token",
-          data["access_token"],
+          "access_token",
+          data["tokens"]["access_token"],
+        );
+        await prefs.setString(
+          "refresh_token",
+          data["tokens"]["refresh_token"],
         );
         await prefs.setString(
           "user_id",
@@ -77,45 +81,26 @@
           "password": password,
         }),
       ).timeout(const Duration(seconds: 15,),);
-      print(response.statusCode,);
-      print(response.body,);
       final data = jsonDecode(response.body);
       if (response.statusCode == 200 || response.statusCode==201) {
-  
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("token", data["access_token"]);
-        if (data["user"] != null) {
-          await prefs.setString("user_id", data["user"]["id"]);
-          await prefs.setString("username", data["user"]["name"]);
-          bool is_admin=false;
-          final adminData = data["user"]["is_admin"];
-  
-          if (adminData is bool) {
-            is_admin = adminData;
-          } else if (adminData is String) {
-            is_admin = adminData.toLowerCase() == 'true';
-          }
-  
-          await prefs.setBool("is_admin", is_admin);
-        }
-  
+        await prefs.setString("access_token", data["tokens"]["access_token"],);
+        await prefs.setString("refresh_token", data["tokens"]["refresh_token"],);
+        final user = data["user"];
+        await prefs.setString("user_id",user["id"],);
+        await prefs.setString("username", user["name"],);
+        await prefs.setBool("is_admin",user["is_admin"] ?? false,);
         return data;
-      } else {
-        throw Exception(data["detail"]??"Login Failed",);
       }
+      throw Exception(data["detail"] ?? "Login Failed",);
     }
   
     // =========================
     // GET CONTESTS
     // =========================
   
-    static Future<List<dynamic>>
-    getContests()
-    async {
-      final response =
-      await http.get(
-        Uri.parse("$baseUrl/contests"),
-      );
+    static Future<List<dynamic>> getContests() async {
+      final response = await http.get(Uri.parse("$baseUrl/contests"),);
       if(response.statusCode == 200){
         return jsonDecode(
             response.body
@@ -124,9 +109,7 @@
       throw Exception(
           "Failed to load contests"
       );
-  
     }
-  
     // =========================
     // UPDATE HANDLES
     // =========================
@@ -135,7 +118,7 @@
       final prefs = await SharedPreferences.getInstance();
       String? token =
       prefs.getString(
-          "token"
+          "access_token"
       );
       if(token == null){
         throw Exception(
@@ -164,25 +147,16 @@
           "Bearer $token"
         },
         body:
-  
         jsonEncode(
             body
         ),
-  
       );
   
-      final data =
-  
-      jsonDecode(
-          response.body
-      );
-  
-      print(data);
-  
+      final data = jsonDecode(response.body);
+
       if(response.statusCode == 200 || response.statusCode == 201) {
         return data;
       }
-  
       throw Exception(
           data["detail"]
       );
@@ -191,7 +165,33 @@
     // =========================
     // GET REMINDERS
     // =========================
-  
+
+    static Future<bool> refreshAccessToken() async{
+      final prefs=await SharedPreferences.getInstance();
+      final refreshToken=prefs.getString("refresh_token");
+      if(refreshToken==null) {
+        return false;
+      }
+      final response=await http.post(
+        Uri.parse("$baseUrl/auth/refresh"),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "refresh_token": refreshToken,
+        }),
+      );
+      if(response.statusCode==200){
+        final data=jsonDecode(response.body);
+        await prefs.setString("access_token", data["access_token"]);
+        await prefs.setString("refresh_token", data["refresh_token"]);
+        return true;
+      }
+      await prefs.clear();
+      return false;
+
+    }
+
     static Future<List<dynamic>> getReminders() async {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token");
