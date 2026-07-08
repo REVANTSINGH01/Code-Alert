@@ -74,7 +74,51 @@ backend/
 │
 └── main.py
 ```
+# 🔐 Authentication Flow
 
+CodeAlert uses a dual-token authentication strategy.
+
+- **Access Token**
+  - JWT
+  - Short-lived (60 minutes)
+  - Sent in the `Authorization` header
+
+- **Refresh Token**
+  - Opaque UUID
+  - Stored securely in MongoDB
+  - Long-lived (30 days)
+  - Automatically rotated on every refresh request
+
+### Session Flow
+
+```text
+Login
+   │
+   ▼
+Access Token + Refresh Token
+   │
+   ▼
+Access Token Expires
+   │
+   ▼
+Flutter calls /auth/refresh
+   │
+   ▼
+New Access Token
++
+New Refresh Token
+   │
+   ▼
+Retry Original Request
+```
+
+### Security Features
+
+- Refresh token rotation
+- Server-side refresh token revocation
+- Single-device logout
+- Logout from all devices
+- Automatic expiration using MongoDB TTL indexes
 ---
 # 🗄️ Entity Relationship Diagram (ER Diagram)
 
@@ -166,12 +210,16 @@ The following diagram illustrates the logical relationships between the MongoDB 
 ```http
 POST /signup
 POST /login
+POST /auth/refresh
+POST /auth/logout
+POST /auth/logout-all
 ```
 
 ## User
 
 ```http
-PUT /users/handles
+PUT /handles
+PATCH /update-password
 POST /dashboard/sync
 ```
 
@@ -185,7 +233,7 @@ GET /contests
 
 ```http
 POST /reminder
-GET /reminders/{id}
+GET /reminders
 ```
 
 ---
@@ -225,8 +273,12 @@ GET /reminders/{id}
 
 ## Completed
 
-- [x] Authentication
-- [x] JWT Login
+- [x] User Authentication
+- [x] JWT Access Tokens
+- [x] Refresh Token Rotation
+- [x] Automatic Session Refresh
+- [x] Secure Logout
+- [x] Logout from All Devices
 - [x] Contest Fetch
 - [x] Contest Countdown
 - [x] Profile Page
@@ -251,11 +303,12 @@ GET /reminders/{id}
 ## Planned
 
 - [ ] Push Notifications
-- [ ] Leaderboards
+- [ ] Redis Contest Caching
 - [ ] AI Contest Recommendation
 - [ ] Statistics Dashboard
+- [ ] Leaderboards
 - [ ] Activity Graph
-- [ ] Multi-device Sync
+- [ ] Active Device Management
 
 ---
 
