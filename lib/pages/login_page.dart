@@ -29,21 +29,13 @@ class _LoginPageState extends State<LoginPage> {
         password: passwordController.text.trim(),
       );
       print("2 API DONE");
-      final prefs = await SharedPreferences.getInstance();
-
-      await prefs.setString("token", user["access_token"]);
-      await prefs.setString("user_id", user["user"]["id"]);
-      await prefs.setString("username", user["user"]["name"]);
-      await prefs.setBool("is_logged_in", true);
-
-      print("4 NAVIGATING");
+      await SharedPreferences.getInstance()
+          .then((prefs) => prefs.setBool("is_logged_in", true));
       if (!mounted) return;
       print(user);
       Navigator.pushReplacementNamed(context, '/main_layout');
       print("5 DONE");
     } catch (e) {
-      print("LOGIN ERROR");
-      print(e);
       // Optional: Add a SnackBar here to show the error to the user
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -84,9 +76,7 @@ class _LoginPageState extends State<LoginPage> {
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
               child: ConstrainedBox(
-                // Ensures the card is vertically centered when there's room,
-                // but the whole thing scrolls (instead of overflowing) once
-                // the keyboard shrinks the available height.
+
                 constraints: BoxConstraints(
                   minHeight: constraints.maxHeight - 48.0, // minus vertical padding above
                 ),
@@ -164,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                           obscureText: true,
                           style: const TextStyle(color: textPrimary, fontSize: 16),
                           decoration: InputDecoration(
-                            hintText: "â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢",
+                            hintText: "12345#",
                             hintStyle: const TextStyle(color: textSecondary, fontSize: 16, letterSpacing: 2.0),
                             suffixIcon: const Icon(Icons.lock_outline, color: textSecondary, size: 20),
                             enabledBorder: const UnderlineInputBorder(

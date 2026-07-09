@@ -3,7 +3,6 @@ import 'package:my_app/services/api_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'provider/theme_provider.dart';
-import 'package:my_app/pages/home_page.dart';
 import 'package:my_app/pages/profilepage.dart';
 import 'package:my_app/pages/settings.dart';
 import 'package:my_app/pages/about_app.dart';
@@ -26,9 +25,10 @@ void main() async{
       print(e);
     }
   }
-  String? token=prefs.getString("token");
+  String? accessToken=prefs.getString("access_token");
+  String? refreshToken=prefs.getString("refresh_token");
   Widget startPage;
-  if (token != null) {
+  if (accessToken != null && refreshToken != null) {
     startPage = MainLayout();
   } else {
     startPage = LoginPage();

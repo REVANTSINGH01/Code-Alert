@@ -6,7 +6,7 @@
   class ApiService {
   
     // Android Emulator URL
-    static const String baseUrl = "http://192.168.1.158:8000";
+    static const String baseUrl = "http://192.168.29.61:8000";
   
   
     static Future<Map<String, dynamic>> signup({
@@ -14,25 +14,19 @@
       required String email,
       required String password,
     }) async {
-  
+      Map<String,dynamic> body={};
+      body["name"]=name;
+      body["email"]=email;
+      body["password"]=password;
       final response = await http.post(
         Uri.parse("$baseUrl/signup"),
-  
         headers: {
           "Content-Type": "application/json",
         },
-  
-        body: jsonEncode({
-          "name": name,
-          "email": email,
-          "password": password,
-        }),
-      );
-  
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 8));
       final data = jsonDecode(response.body);
-  
       if (response.statusCode==200 || response.statusCode == 201) {
-  
         final prefs =
         await SharedPreferences
             .getInstance();
@@ -52,14 +46,10 @@
           "username",
           data["user"]["name"],
         );
-  
         await prefs.setBool("is_admin", data["user"]["is_admin"] ?? false);
-  
         return data;
-  
-      } else {
-        throw Exception(data["detail"]);
       }
+        throw Exception(data["detail"]);
     }
   
     // =========================
@@ -70,17 +60,16 @@
       required String email,
       required String password,
     }) async {
-  
+      Map<String,dynamic> body={};
+      body["email"]=email;
+      body["password"]=password;
       final response = await http.post(
-        Uri.parse("$baseUrl/login",),
+        Uri.parse("$baseUrl/login"),
         headers: {
           "Content-Type": "application/json",
         },
-        body: jsonEncode({
-          "email": email,
-          "password": password,
-        }),
-      ).timeout(const Duration(seconds: 15,),);
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 8));
       final data = jsonDecode(response.body);
       if (response.statusCode == 200 || response.statusCode==201) {
         final prefs = await SharedPreferences.getInstance();
@@ -100,7 +89,7 @@
     // =========================
   
     static Future<List<dynamic>> getContests() async {
-      final response = await http.get(Uri.parse("$baseUrl/contests"),);
+      final response = await authenticatedRequest(method: "GET", url:"$baseUrl/contests",);
       if(response.statusCode == 200){
         return jsonDecode(
             response.body
@@ -115,21 +104,9 @@
     // =========================
   
     static Future<Map<String,dynamic>> updateHandles({String? cfHandle, String? lcHandle, String? ccHandle,}) async {
-      final prefs = await SharedPreferences.getInstance();
-      String? token =
-      prefs.getString(
-          "access_token"
-      );
-      if(token == null){
-        throw Exception(
-            "Login required"
-        );
-      }
-      Map<String,dynamic>
-      body = {};
+      Map<String,dynamic>body = {};
       if(cfHandle != null && cfHandle.isNotEmpty){
-        body["cf_handle"] =
-            cfHandle;
+        body["cf_handle"] = cfHandle;
       }
       if(lcHandle != null && lcHandle.isNotEmpty){
         body["lc_handle"] = lcHandle;
@@ -138,22 +115,8 @@
       ccHandle != null && ccHandle.isNotEmpty){
         body["cc_handle"]=ccHandle;
       }
-      final response = await http.put(
-        Uri.parse("$baseUrl/handles"),
-        headers:{
-          "Content-Type":
-          "application/json",
-          "Authorization":
-          "Bearer $token"
-        },
-        body:
-        jsonEncode(
-            body
-        ),
-      );
-  
+      final response = await authenticatedRequest(method: "PUT", url: "$baseUrl/handles",body:body,);
       final data = jsonDecode(response.body);
-
       if(response.statusCode == 200 || response.statusCode == 201) {
         return data;
       }
@@ -193,23 +156,73 @@
     }
 
     static Future<List<dynamic>> getReminders() async {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("token");
 
-      final response = await http.get(
-        Uri.parse("$baseUrl/reminders/"),
-
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-      );
-
+      final response = await authenticatedRequest(method: "GET",url:"$baseUrl/reminders/",);
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
         throw Exception("Failed to load reminders: ${response.body}");
       }
+    }
+
+    static Future<http.Response> authenticatedRequest({
+      required String method,
+      required String url,
+      Map<String,dynamic>? body,
+  }) async{
+      final prefs=await SharedPreferences.getInstance();
+      String? accessToken=prefs.getString("access_token");
+      if(accessToken==null){
+        throw Exception("Login required");
+      }
+      Future<http.Response> sendRequest(String token){
+        final headers={
+          "Content-Type": "application/json",
+          "Authorization" : "Bearer $token",
+        };
+        switch (method.toUpperCase()){
+          case "GET":
+            return http.get(
+              Uri.parse(url),
+              headers: headers,
+            );
+          case "POST":
+            return http.post(
+              Uri.parse(url),
+              headers: headers,
+              body: body==null ? null: jsonEncode(body),
+            );
+          case "PUT":
+            return http.put(
+              Uri.parse(url),
+              headers: headers,
+              body: body==null ? null: jsonEncode(body),
+            );
+          case "PATCH":
+            return http.patch(
+              Uri.parse(url),
+              headers: headers,
+              body: body == null ? null : jsonEncode(body),
+            );
+          case "DELETE":
+            return http.delete(
+              Uri.parse(url),
+              headers: headers,
+            );
+          default:
+            throw Exception("Unsupported HTTP method");
+        }
+      }
+      var response= await sendRequest(accessToken);
+      if(response.statusCode==401){
+        final refreshed=await refreshAccessToken();
+        if(!refreshed){
+          throw Exception("Session Expired");
+        }
+        accessToken= prefs.getString("access_token");
+        response =await sendRequest(accessToken!);
+      }
+      return response;
     }
   
     // =========================
@@ -221,23 +234,12 @@
       required String contestName,
       required String reminderTime,
     }) async {
-  
-      final response = await http.post(
-        Uri.parse("$baseUrl/reminder"),
-  
-        headers: {
-          "Content-Type": "application/json",
-        },
-  
-        body: jsonEncode({
-          "user_id": userId,
-          "contest_name": contestName,
-          "reminder_time": reminderTime,
-        }),
-      );
-  
+      Map<String,dynamic> body={};
+      body["user_id"]=userId;
+      body["contest_name"]=contestName;
+      body["reminder_time"]=reminderTime;
+      final response = await authenticatedRequest(method: "POST", url:"$baseUrl/reminder",body:body,);
       final data = jsonDecode(response.body);
-  
       if (response.statusCode == 200 ||
           response.statusCode == 201) {
         return data;
@@ -246,50 +248,32 @@
       }
     }
 
-    static Future<Map<String,dynamic>> syncDashboard() async {
-      final prefs = await SharedPreferences.getInstance();
-      String? token =prefs.getString("token");
-      print(token);
-      if(token==null) {
-        throw Exception(
-          "Login Required"
-        );
-      }
-      final response =
-      await http.post(
-          Uri.parse(
-              "$baseUrl/dashboard/sync/"
-          ),
-          headers:{
-  
-            "Authorization":
-            "Bearer $token",
-          },
-      ).timeout(const Duration(seconds: 15),);
-      print(response.statusCode);
-      print(response.body);
-      if(response.statusCode==401){
-        await prefs.clear();
-        throw Exception("Session_Expired");
-      }
+    static Future<Map<String, dynamic>> syncDashboard() async {
+      final response = await authenticatedRequest(
+        method: "POST",
+        url: "$baseUrl/dashboard/sync/",
+      );
       final data = jsonDecode(response.body);
-      if(response.statusCode == 200){
+      if (response.statusCode == 200) {
+        print("syncDashboard() called");
         return data;
       }
       throw Exception(
-          data["detail"]
+        data["detail"] ?? "Dashboard Sync Failed",
       );
     }
 
     static Future<Map<String, dynamic>> requestPasswordReset(String email) async {
+      Map<String,dynamic> body={};
+      body["email"]=email;
       final response = await http.post(
         Uri.parse("$baseUrl/forgot-password"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"email": email}),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
       ).timeout(const Duration(seconds: 15));
-
       final data = jsonDecode(response.body);
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         return data;
       } else {
@@ -298,31 +282,35 @@
     }
 
     static Future<String> verifyOtp({required String email, required String otp}) async {
+      Map<String,dynamic> body={};
+      body["email"]=email;
+      body["otp"]=otp;
       final response = await http.post(
         Uri.parse("$baseUrl/verify-otp"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"email": email, "otp": otp}),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
       ).timeout(const Duration(seconds: 15));
-
       final data = jsonDecode(response.body);
-
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Return the reset token so the next screen can use it!
-        return data["access_token"];
+       return data["access_token"];
       } else {
         throw Exception(data["detail"] ?? "Invalid OTP");
       }
     }
-
     static Future<Map<String, dynamic>> resetPassword({required String token, required String newPassword}) async {
+      Map<String,dynamic> body={};
+      body["token"]=token;
+      body["new_password"]=newPassword;
       final response = await http.post(
         Uri.parse("$baseUrl/reset-password"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"token": token, "new_password": newPassword}),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
       ).timeout(const Duration(seconds: 15));
-
       final data = jsonDecode(response.body);
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         return data;
       } else {
