@@ -152,17 +152,39 @@ The following diagram illustrates the logical relationships between the MongoDB 
  }
 }
 ```
+## refresh_tokens
+```json
+{
+  "_id": "ObjectId",
+  "token": "3d13fd70-5d0f-45d8-83b9-5a2a09a57d8d",
+  "user_id": "6865b7ef3f62d5cb3b92cb0a",
 
+  "created_at": "2026-07-10T16:25:13Z",
+  "expires_at": "2026-08-09T16:25:13Z",
+
+  "revoked": false,
+  "revoked_at": null,
+
+  "device_hint": "Flutter"
+}
+
+```
 ---
 
 ## lc_profile
 
 ```json
 {
-"user_id":"123",
-"rating":1824,
-"global_ranking":40000,
-"problems_solved":745
+  "_id": "ObjectId",
+
+  "user_id": "6865b7ef3f62d5cb3b92cb0a",
+  "lc_handle": "abc@123",
+
+  "rating": 1345,
+
+  "global_ranking": 419189,
+
+  "problems_solved": 109
 }
 ```
 
@@ -172,11 +194,33 @@ The following diagram illustrates the logical relationships between the MongoDB 
 
 ```json
 {
-"user_id":"123",
-"rating":1487
+  "_id": "ObjectId",
+
+  "user_id": "6865b7ef3f62d5cb3b92cb0a",
+  "cf_handle": "abc@123",
+  "rating": 364,
+  "max_rating": 465,
+  "rank": "newbie",
+  "problems_solved": 124
 }
 ```
+## cc_profile
+```json
+{
+  "_id": "ObjectId",
 
+  "user_id": "6865b7ef3f62d5cb3b92cb0a",
+  "cc_handle": "abc@123",
+
+  "rating": 399,
+
+  "stars": "1★",
+
+  "global_ranking": 442451,
+
+  "problems_solved": 39
+}
+```
 ---
 
 ## contests
@@ -195,9 +239,10 @@ The following diagram illustrates the logical relationships between the MongoDB 
 
 ```json
 {
+ "_id": "ObjectId",
 "user_id":"123",
 "contest_name":"Codeforces Round",
-"time":"timestamp"
+"reminder_time":"timestamp"
 }
 ```
 
