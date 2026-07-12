@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from fastapi.security import HTTPAuthorizationCredentials
-from app.auth.auth_handler import verify_access_token, security
+from app.auth.auth_handler import get_current_user
 from app.schemas.schemas import DashboardResponse
 from app.database.database import (
     user_collection,
@@ -21,21 +20,9 @@ router = APIRouter(tags=["Dashboard"])
 
 @router.post("/dashboard/sync/", response_model=DashboardResponse)
 async def sync_user_dashboard(
-    credentials: HTTPAuthorizationCredentials = Depends(security)
+    user_id = Depends(get_current_user)
 ):
     try:
-
-        token = credentials.credentials
-        payload = verify_access_token(token)
-
-        if payload is None:
-            raise HTTPException(
-                status_code=401,
-                detail="Invalid token"
-            )
-
-        user_id = payload["user_id"]
-
         user = await user_collection.find_one({
             "_id": ObjectId(user_id)
         })
