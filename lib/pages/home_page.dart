@@ -44,27 +44,24 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> initialize() async {
-    await loadUserData();
-    await loadContests();
-    Future.microtask(() async {
-      try {
-        await ApiService.syncDashboard();
-      } catch (e) {
-        print(e);
-        if (e.toString().contains("Session_Expired")) {
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Session expired. Please log in again."),
-              backgroundColor: Colors.redAccent,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-          logout(context);
-        }
+    try {
+      await Future.wait([
+        loadUserData(),
+        loadContests(),
+      ]);
+    } catch (e) {
+      if (!mounted) return;
+      if (e.toString().contains("Session_Expired")) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Session expired. Please log in again."),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        logout(context);
       }
     }
-    );
   }
 
   Future<void> loadUserData() async {

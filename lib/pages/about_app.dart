@@ -10,7 +10,6 @@ class AboutApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>();
 
-    // 🎨 Dynamic colors
     theme.bgColor == Colors.black ? Colors.white : Colors.black;
     Color textColor=theme.bgColor==const Color(0xFF121212)?Colors.white:Colors.black;
     Color bgColor=theme.bgColor==const Color(0xFF121212)?const Color(0xFF1E1E1E):Colors.white;
