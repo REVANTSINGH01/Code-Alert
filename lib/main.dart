@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:my_app/services/api_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../provider/theme_provider.dart';
+import 'provider/theme_provider.dart';
 import 'package:my_app/pages/profilepage.dart';
 import 'package:my_app/pages/settings.dart';
 import 'package:my_app/pages/about_app.dart';
