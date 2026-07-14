@@ -1,4 +1,7 @@
 from fastapi import FastAPI
+import asyncio
+from contextlib import asynccontextmanager
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import codechef, codeforces, contests, dashboard, leetcode, reminders, auth
 from app.routers import users
@@ -7,11 +10,22 @@ from app.auth.auth_handler import setup_refresh_token_indexes
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from app.limiter import limiter
+from app.database.database import lc_profile_collection
+from app.routers.leetcode import update_all_profiles
+
+@asynccontextmanager
+async def lifespan(app:FastAPI):
+    scheduler  =AsyncIOScheduler()
+    scheduler.add_job(update_all_profiles,'interval',hours=3)
+    scheduler.start()
+    yield
+    scheduler.shutdown()
 
 app = FastAPI(
     title="CodeAlert API",
     description="Backend for the CodeAlert Flutter app",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 app.add_middleware(
     CORSMiddleware,
@@ -40,3 +54,4 @@ async def startup():
 @app.get("/")
 def root():
     return {"message": "CodeAlert API is running with MongoDB!"}
+

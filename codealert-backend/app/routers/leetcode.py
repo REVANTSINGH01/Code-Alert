@@ -2,110 +2,90 @@ from fastapi import APIRouter, HTTPException,Depends
 from fastapi.security import HTTPAuthorizationCredentials
 from app.schemas.schemas import LCProfileResponse
 from app.database.database import lc_profile_collection
+import asyncio
 import httpx
+from datetime import datetime, timezone
+from app.database.database import lc_profile_collection
 from app.auth.auth_handler import (
     verify_access_token,
     security
 )
 
+
 router = APIRouter(tags=["LeetCode Profile"])
 
 @router.get("/profile/lc/{lc_handle}", response_model=LCProfileResponse)
-async def get_lc_profile(user_id:str,
-    lc_handle:str,):
-    url = "https://leetcode.com/graphql"
+async def get_lc_profile(user_id:str,lc_handle:str,):
+    profile = await lc_profile_collection.find_one({"user_id": user_id,"lc_handle": lc_handle})
     
-    # This is the GraphQL query. It asks LeetCode for specific fields.
-    query = """
-    query getUserProfile($username: String!) {
-        matchedUser(username: $username) {
-            submitStatsGlobal {
-                acSubmissionNum {
-                    difficulty
-                    count
-                }
-            }
-        }
-        userContestRanking(username: $username) {
-            rating
-            globalRanking
-        }
-    }
-    """
-    
-    # We pass the username into the query variables
-    variables = {"username": lc_handle}
-    
-    try:
-        async with httpx.AsyncClient() as client:
-            # Send the POST request to LeetCode's GraphQL API
-            response =await client.post(url, json={"query": query, "variables": variables})
-            data = response.json()
-            
-            # 1. Check if the user actually exists
-            if "errors" in data or not data["data"]["matchedUser"]:
-                raise HTTPException(status_code=404, detail="LeetCode handle not found")
-                
-            user_data = data["data"]
-            
-            # 2. Extract Problems Solved
-            # LeetCode returns an array (All, Easy, Medium, Hard). We want "All".
-            solved_count = 0
-            submissions = user_data["matchedUser"]["submitStatsGlobal"]["acSubmissionNum"]
-            for sub in submissions:
-                if sub["difficulty"] == "All":
-                    solved_count = sub["count"]
-                    break
-                    
-            # 3. Extract Rating & Ranking
-            # Note: If a user has never done a contest, this will be None
-            contest_data = user_data.get("userContestRanking")
-            rating = 0.0
-            global_ranking = 0
-            
-            if contest_data:
-                rating = contest_data.get("rating", 0.0)
-                global_ranking = contest_data.get("globalRanking", 0)
-                print("EXTRACTED")
-
-                print(
-                "rating:",
-                rating
-                )
-
-                print(
-                "solved:",
-                solved_count
-                )
-
-                print(
-                "rank:",
-                global_ranking
-                )
-            
-        # 4. Prepare data for our database
-        lc_data = {
-            "user_id": user_id,
-            "lc_handle": lc_handle,
-            "rating": round(rating, 2), # Round to 2 decimal places
-            "global_ranking": global_ranking,
-            "problems_solved": solved_count
-        }
-          
-        # 5. Save/Update it in MongoDB
-        await lc_profile_collection.update_one(
-            {"user_id": user_id}, 
-            {"$set": lc_data}, 
-            upsert=True 
-        )
-
-        return lc_data
-
-    except HTTPException:
-        raise
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=str(e)
+    if profile:
+        return profile
+        
+    raise HTTPException(
+        status_code=404, 
+        detail="Profile data not found. It will be updated by the next background sync."
     )
+
+async def update_all_profiles():
+
+    print("Starting background update of all LeetCode profiles...")
+
+    cursor = lc_profile_collection.find({})
+    users = await cursor.to_list(length=None)
+
+    for user in users:
+        lc_handle = user.get("lc_handle")
+        user_id = user.get("user_id")
+
+        if not lc_handle:
+            continue
+
+        try:
+            url = "https://leetcode.com/graphql"
+            query = """
+            query getUserProfile($username: String!) {
+                matchedUser(username: $username) {
+                    submitStatsGlobal {
+                        acSubmissionNum { difficulty count }
+                    }
+                }
+                userContestRanking(username: $username) { rating globalRanking }
+            }
+
+            """
+
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, json={"query": query, "variables": {"username": lc_handle}})
+                data = response.json() 
+
+                if "errors" in data or not data.get("data", {}).get("matchedUser"):
+                    continue # Skip if user not found
+
+                user_data = data["data"]
+
+                solved_count = 0
+                for sub in user_data["matchedUser"]["submitStatsGlobal"]["acSubmissionNum"]:
+                    if sub["difficulty"] == "All":
+                        solved_count = sub["count"]
+                        break
+
+                contest_data = user_data.get("userContestRanking")
+                rating = contest_data.get("rating", 0.0) if contest_data else 0.0
+                global_ranking = contest_data.get("globalRanking", 0) if contest_data else 0
+
+            lc_data = {
+                "user_id": user_id,
+                "lc_handle": lc_handle,
+                "rating": round(rating, 2),
+                "global_ranking": global_ranking,
+                "problems_solved": solved_count,
+                "last_updated": datetime.now(timezone.utc)
+            }
+
+            await lc_profile_collection.update_one(
+                {"user_id": user_id},{"$set": lc_data}
+            )
+            print(f"Successfully updated {lc_handle}")
+            await asyncio.sleep(3) 
+        except Exception as e:
+            print(f"Failed to update {lc_handle}: {e}")
