@@ -3,6 +3,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 from app.schemas.schemas import LCProfileResponse
 from app.database.database import lc_profile_collection
 import asyncio
+from datetime import datetime, timedelta
 import httpx
 from datetime import datetime, timezone
 from app.database.database import lc_profile_collection
@@ -15,7 +16,21 @@ from app.auth.auth_handler import (
 router = APIRouter(tags=["LeetCode Profile"])
 
 @router.get("/profile/lc/{lc_handle}", response_model=LCProfileResponse)
-async def get_lc_profile(user_id:str,lc_handle:str,):
+async def get_lc_profile(user_id:str,lc_handle:str,force_refresh: bool = False):
+    if not force_refresh:
+        existing_profile = await lc_profile_collection.find_one({
+            "user_id": user_id, 
+            "lc_handle": lc_handle
+        })
+        
+        if existing_profile and "last_updated" in existing_profile:
+            last_updated = existing_profile["last_updated"]
+            if last_updated.tzinfo is None:
+                last_updated = last_updated.replace(tzinfo=timezone.utc)
+                
+            # If less than 1 hour old, return cached data
+            if datetime.now(timezone.utc) - last_updated < timedelta(hours=1):
+                return existing_profile
     profile = await lc_profile_collection.find_one({"user_id": user_id,"lc_handle": lc_handle})
     
     if profile:
