@@ -9,14 +9,15 @@ from datetime import datetime, timezone
 from app.database.database import lc_profile_collection
 from app.auth.auth_handler import (
     verify_access_token,
-    security
+    security,
+    get_current_user
 )
 
 
 router = APIRouter(tags=["LeetCode Profile"])
 
 @router.get("/profile/lc/{lc_handle}", response_model=LCProfileResponse)
-async def get_lc_profile(user_id:str,lc_handle:str,force_refresh: bool = False):
+async def get_lc_profile(lc_handle:str,user_id: str = Depends(get_current_user),force_refresh: bool = False,):
     if not force_refresh:
         existing_profile = await lc_profile_collection.find_one({
             "user_id": user_id, 

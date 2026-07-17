@@ -46,7 +46,7 @@ async def create_user(request:Request,user:UserCreate):
 
     user_dict=user.model_dump(mode="json")
     user_dict["password"]=get_password_hash(user.password)
-    
+    user_dict["is_admin"] = False
     # Initialize an empty handles dictionary for brand new users
     user_dict["handles"]={}
 

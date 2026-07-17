@@ -68,7 +68,6 @@ class UserCreate(BaseModel):
     name: str
     email: EmailStr
     password: str
-    is_admin:bool=False
 
 class UserLogin(BaseModel):
     email: EmailStr
