@@ -7,13 +7,14 @@ from app.schemas.schemas import CCProfileResponse
 import re 
 from app.auth.auth_handler import (
     verify_access_token,
-    security
+    security,
+    get_current_user
 )
 
 router = APIRouter(tags=["CodeChef"])
 
 @router.get("/profile/cc/{cc_handle}", response_model=CCProfileResponse)
-async def get_cc_profile(user_id:str,cc_handle: str,):
+async def get_cc_profile(cc_handle: str,user_id=Depends(get_current_user),):
     url = f"https://www.codechef.com/users/{cc_handle}"
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -82,5 +83,5 @@ async def get_cc_profile(user_id:str,cc_handle: str,):
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=str(e)
+            detail="Unable to fetch Codechef profile"
     )

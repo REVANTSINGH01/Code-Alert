@@ -122,17 +122,6 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 async def setup_refresh_token_indexes():
     col = refresh_col()
-
-    await col.create_index(
-        "expires_at",
-        expireAfterSeconds=0
-    )
-
-    await col.create_index(
-        "token",
-        unique=True
-    )
-
-    await col.create_index(
-        "user_id"
-    )
+    await col.create_index("expires_at", expireAfterSeconds=0)
+    await col.create_index("token",unique=True)
+    await col.create_index("user_id")

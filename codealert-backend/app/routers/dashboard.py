@@ -104,5 +104,5 @@ async def sync_user_dashboard(
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=str(e)
+            detail="Failed to synchronize dashboard."
         )

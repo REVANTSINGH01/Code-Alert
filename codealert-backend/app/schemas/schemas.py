@@ -72,7 +72,6 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
-    is_admin:bool =False
 
 class PlatformHandles(BaseModel):
     cf_handle: Optional[str] = None

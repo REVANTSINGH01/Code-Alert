@@ -5,14 +5,14 @@ from app.database.database import cf_profile_collection
 import httpx
 from app.auth.auth_handler import (
     verify_access_token,
-    security
+    security,get_current_user
 )
 
 router = APIRouter(tags=["Codeforces Profile"])
 
 @router.get("/profile/cf/{cf_handle}", response_model=CFProfileResponse)
-async def get_cf_profile(user_id:str,
-cf_handle:str):
+async def get_cf_profile(
+cf_handle:str,user_id=Depends(get_current_user)):
     try:  
         async with httpx.AsyncClient() as client:
         # 1. Fetch basic info (Rating, Rank) from Codeforces
@@ -70,5 +70,5 @@ cf_handle:str):
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=str(e)
+            detail="Unable to fetch Codeforces profile."
     )

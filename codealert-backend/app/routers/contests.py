@@ -4,28 +4,42 @@ from typing import List
 import httpx
 import asyncio
 import datetime
+import logging
+from app.database.database import contest_collection
 
 router = APIRouter(tags=["Contests"])
+logger = logging.getLogger(__name__)
 
 @router.get("/contests", response_model=List[ContestResponse])
 async def get_contest():
-    contests=[]
-    async with httpx.AsyncClient(timeout=10.0) as client:    
-        cf, cc, lc = await asyncio.gather(
-        get_cf_contests(client),
-        get_cc_contests(client),
-        get_lc_contests(client),
-        )
-    contests.extend(cf)
-    contests.extend(cc)
-    contests.extend(lc)
+    
+    contests= await contest_collection.find().sort(
+        "start_time", 1
+    ).to_list(length=None)
 
-    contests.sort(
-        key=lambda x:
-        x["start_time"]
-    )
+    for contest in contests:
+        contest.pop("_id", None)
+
     return contests
 
+async def update_contests():
+    contests=[]
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        results= await asyncio.gather(
+            get_cf_contests(client),
+            get_cc_contests(client),
+            get_lc_contests(client),
+            return_exceptions=True
+        )
+    for result in results:
+        if isinstance(result, Exception):
+            logger.exception("Failed to fetch contests", exc_info=result)
+        else:
+            contests.extend(result)
+    if contests:
+        contests.sort(key=lambda x: x["start_time"])
+        await contest_collection.delete_many({})
+        await contest_collection.insert_many(contests)
 
 
 async def get_cf_contests(client: httpx.AsyncClient):
@@ -33,8 +47,7 @@ async def get_cf_contests(client: httpx.AsyncClient):
     
     try:
         # Fetch data from Codeforces
-        async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.get(url)
+        response = await client.get(url)
         data = response.json()
         
         if data["status"] != "OK":
@@ -68,7 +81,8 @@ async def get_cf_contests(client: httpx.AsyncClient):
         return contests
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception("Failed to fetch Codeforces contests")
+        raise HTTPException(status_code=500, detail="Failed to fetch Codeforces contests")
     
 async def get_lc_contests(client: httpx.AsyncClient):
     url= "https://leetcode.com/graphql"
@@ -88,8 +102,8 @@ async def get_lc_contests(client: httpx.AsyncClient):
     """
 
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.post(url,json={"query": query})
+        
+        response = await client.post(url,json={"query": query})
         data=response.json()
         now =datetime.datetime.now(datetime.timezone.utc)
         three_days=(now+datetime.timedelta(days=7))
@@ -115,13 +129,14 @@ async def get_lc_contests(client: httpx.AsyncClient):
         return contests
         
     except Exception as e:
-        raise HTTPException (status_code=500,detail=str(e))
+        logger.exception("Failed to fetch Leetcode contests")
+        raise HTTPException (status_code=500,detail="Failed to fetch Leetcode contests")
     
 async def get_cc_contests(client: httpx.AsyncClient):
     url="https://www.codechef.com/api/list/contests/all"
     try: 
-        async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.get(url)
+        
+        response = await client.get(url)
         data=response.json()
         if data["status"] != "success":
             raise HTTPException(status_code=400, detail="Failed to fetch from CodeChef")
@@ -150,4 +165,5 @@ async def get_cc_contests(client: httpx.AsyncClient):
                 })
         return contests
     except Exception as e:
-        raise HTTPException (status_code=500,detail=str(e))
+        logger.exception("Failed to fetch CodeChef contests")
+        raise HTTPException (status_code=500,detail="Failed to fetch Codechef contests")

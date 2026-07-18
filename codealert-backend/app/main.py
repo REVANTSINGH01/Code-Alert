@@ -12,11 +12,15 @@ from slowapi.errors import RateLimitExceeded
 from app.limiter import limiter
 from app.database.database import lc_profile_collection
 from app.routers.leetcode import update_all_profiles
+from app.routers.contests import update_contests
 
 @asynccontextmanager
 async def lifespan(app:FastAPI):
+    await setup_refresh_token_indexes()
+    await update_contests()
     scheduler  =AsyncIOScheduler()
     scheduler.add_job(update_all_profiles,'interval',hours=3)
+    scheduler.add_job(update_contests,"interval",minutes=15)
     scheduler.start()
     yield
     scheduler.shutdown()
@@ -29,8 +33,8 @@ app = FastAPI(
 )
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Allows any web page to connect during testing
-    allow_credentials=True,
+    allow_origins=["http://localhost:8000"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -47,9 +51,6 @@ app.include_router(codechef.router)
 app.include_router(dashboard.router)     
 app.include_router(auth.router)
 
-@app.on_event("startup")
-async def startup():
-    await setup_refresh_token_indexes()
 
 @app.get("/")
 def root():
