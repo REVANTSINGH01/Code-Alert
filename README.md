@@ -239,10 +239,12 @@ The following diagram illustrates the logical relationships between the MongoDB 
 
 ```json
 {
- "_id": "ObjectId",
+"_id":"ObjectId",
 "user_id":"123",
-"contest_name":"Codeforces Round",
-"reminder_time":"timestamp"
+"contest_id":"abc123",
+"minutes_before":30,
+"status":"PENDING",
+"created_at":"timestamp"
 }
 ```
 
