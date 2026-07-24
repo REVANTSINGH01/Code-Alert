@@ -1,11 +1,8 @@
-from fastapi import APIRouter, HTTPException, status,Depends
+from fastapi import APIRouter, HTTPException, status,Depends,Response
 from pymongo.errors import DuplicateKeyError
-from datetime import datetime, timedelta, timezone
-from fastapi.security import HTTPAuthorizationCredentials
+from datetime import datetime, timezone
 from app.auth.auth_handler import (
-    verify_access_token,
     get_current_user,
-    security
 )
 from typing import List
 from bson import ObjectId
@@ -47,7 +44,7 @@ async def create_reminder(reminder: ReminderCreate,user_id=Depends(get_current_u
 async def get_user_reminders(user_id: str = Depends(get_current_user)):
 
     # Find all reminders matching this user_id
-    cursor = reminder_collection.find({"user_id": user_id})
+    cursor = reminder_collection.find({"user_id": user_id}).sort("remainder_time",1)
     reminders = await cursor.to_list(length=100) # Limit to 100 for safety
     
     formatted_reminders = []
@@ -82,4 +79,4 @@ async def delete_reminder(reminder_id: str,user_id=Depends(get_current_user)):
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Reminder not found")
         
-    return {"message": "Reminder deleted"}
+    return Response(status_code=204)

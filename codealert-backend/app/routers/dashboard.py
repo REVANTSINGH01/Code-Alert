@@ -46,24 +46,25 @@ async def sync_user_dashboard(
         if handles.get("cf_handle"):
             tasks.append(
                 get_cf_profile(
+                    handles["cf_handle"],
                     user_id,
-                    handles["cf_handle"]
                 )
             )
 
         if handles.get("lc_handle"):
             tasks.append(
                 get_lc_profile(
+                    handles["lc_handle"],
                     user_id,
-                    handles["lc_handle"]
                 )
             )
 
         if handles.get("cc_handle"):
             tasks.append(
                 get_cc_profile(
+                    handles["cc_handle"],
                     user_id,
-                    handles["cc_handle"]
+
                 )
             )
 

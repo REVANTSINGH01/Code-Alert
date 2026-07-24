@@ -104,6 +104,13 @@ async def get_lc_contests(client: httpx.AsyncClient):
     try:
         
         response = await client.post(url,json={"query": query})
+        if response.status_code != 200:
+            logger.error(
+                "LeetCode returned %s: %s",
+                response.status_code,
+                response.text[:300],
+            )
+            return []
         data=response.json()
         now =datetime.datetime.now(datetime.timezone.utc)
         three_days=(now+datetime.timedelta(days=7))
@@ -164,6 +171,10 @@ async def get_cc_contests(client: httpx.AsyncClient):
                     c["contest_duration"]
                 })
         return contests
-    except Exception as e:
-        logger.exception("Failed to fetch CodeChef contests")
-        raise HTTPException (status_code=500,detail="Failed to fetch Codechef contests")
+    except httpx.HTTPError as e:
+        logger.warning("Failed to connect to LeetCode: %s", e)
+        return []
+
+    except Exception:
+        logger.exception("Unexpected error while fetching LeetCode contests.")
+        return []
