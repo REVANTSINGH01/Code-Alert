@@ -18,6 +18,8 @@ from app.routers.contests import update_contests
 async def lifespan(app:FastAPI):
     await setup_refresh_token_indexes()
     await update_contests()
+    await update_all_profiles()
+
     scheduler  =AsyncIOScheduler()
     scheduler.add_job(update_all_profiles,'interval',hours=3)
     scheduler.add_job(update_contests,"interval",minutes=15)
