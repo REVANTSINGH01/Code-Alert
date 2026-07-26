@@ -44,29 +44,6 @@ class _ProfilePage extends State<ProfilePage> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       loadUser();
     });
-
-    syncTimer = Timer.periodic(
-      const Duration(minutes: 2),
-          (_) {
-        if (mounted) loadUser(showLoader: false);
-      },
-    );
-  }
-
-  DateTime _lastSyncTime = DateTime.now().subtract(const Duration(minutes: 5));
-
-  // ...
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      // Check if at least 1 minute has passed since the last sync
-      final now = DateTime.now();
-      if (now.difference(_lastSyncTime).inMinutes >= 1) {
-        _lastSyncTime = now;
-        if (mounted) loadUser(showLoader: false);
-      }
-    }
   }
 
   Future<void> loadUser({bool showLoader = true}) async {

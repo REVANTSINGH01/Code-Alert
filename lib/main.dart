@@ -18,8 +18,7 @@ void main() async{
   bool logged = prefs.getBool("is_logged_in") ?? false;
   if(logged){
     try{
-      print("AUTO LOGIN SYNC");
-      await ApiService.syncDashboard();
+       ApiService.syncDashboard();
     }
     catch(e){
       print(e);
