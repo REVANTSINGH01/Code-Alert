@@ -7,7 +7,7 @@ from app.auth.auth_handler import (
 from typing import List
 from bson import ObjectId
 from app.database.database import reminder_collection
-from app.schemas.schemas import ReminderCreate, ReminderResponse
+from app.schemas.schemas import ReminderCreate, ReminderResponse, ReminderUpdate
 
 router = APIRouter(tags=["Reminders"])
 
@@ -16,7 +16,7 @@ async def create_reminder(reminder: ReminderCreate,user_id=Depends(get_current_u
     
 
     # Insert into database 
-    existing= await reminder_collection.find_one({"user_id":user_id,"contest_id":reminder.contest_id})
+    existing= await reminder_collection.find_one({"user_id": user_id,"contest_name": reminder.contest_name})
     if existing:
         raise HTTPException(status_code=409,detail="Reminder already exists.")
     reminder_dict = reminder.model_dump()
@@ -40,11 +40,11 @@ async def create_reminder(reminder: ReminderCreate,user_id=Depends(get_current_u
     return new_reminder
 
 # Get all reminders for a specific user
-@router.get("/reminders/", response_model=List[ReminderResponse])
+@router.get("/reminders", response_model=List[ReminderResponse])
 async def get_user_reminders(user_id: str = Depends(get_current_user)):
 
     # Find all reminders matching this user_id
-    cursor = reminder_collection.find({"user_id": user_id}).sort("remainder_time",1)
+    cursor = reminder_collection.find({"user_id": user_id}).sort("reminder_time",1)
     reminders = await cursor.to_list(length=100) # Limit to 100 for safety
     
     formatted_reminders = []
@@ -54,6 +54,29 @@ async def get_user_reminders(user_id: str = Depends(get_current_user)):
         formatted_reminders.append(r)
         
     return formatted_reminders
+
+@router.put("/reminder/{id}")
+async def update_reminder(
+    id: str,
+    data: ReminderUpdate,
+    user_id: str = Depends(get_current_user),
+):
+    result = await reminder_collection.update_one(
+        {
+            "_id": ObjectId(id),
+            "user_id": user_id
+        },
+        {
+            "$set": {
+                "reminder_time": data.reminder_time
+            }
+        }
+    )
+
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Reminder not found")
+
+    return {"message": "Reminder updated successfully"}
 
 # Delete a reminder
 @router.delete("/reminder/{reminder_id}", status_code=status.HTTP_204_NO_CONTENT)
