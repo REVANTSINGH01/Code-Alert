@@ -36,13 +36,17 @@ class ResetTokenRecordDB(BaseModel):
 
 class ReminderCreate(BaseModel):
     contest_name: str
+    contest_start: datetime
     reminder_time: str
 
 class ReminderResponse(BaseModel):
     id: str
-    user_id: str
     contest_name: str
+    contest_start: datetime
     reminder_time: str
+
+class ReminderUpdate(BaseModel):
+    reminder_time: datetime
 
 class ContestResponse(BaseModel):
     name: str

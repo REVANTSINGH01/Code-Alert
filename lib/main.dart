@@ -15,23 +15,19 @@ import 'package:my_app/pages/main_layout.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   final prefs=await SharedPreferences.getInstance();
-  bool logged = prefs.getBool("is_logged_in") ?? false;
-  if(logged){
-    try{
-       ApiService.syncDashboard();
-    }
-    catch(e){
-      print(e);
-    }
-  }
   String? accessToken=prefs.getString("access_token");
   String? refreshToken=prefs.getString("refresh_token");
-  Widget startPage;
-  if (accessToken != null && refreshToken != null) {
-    startPage = MainLayout();
-  } else {
-    startPage = LoginPage();
+  bool logged =accessToken != null && refreshToken != null;
+  if(logged){
+    try{
+       await ApiService.syncDashboard();
+    }
+    catch(e){
+      debugPrint(e.toString());
+    }
   }
+
+  Widget startPage=logged?const MainLayout():const LoginPage();
 
   runApp(
     ChangeNotifierProvider(create: (_)=>ThemeProvider(),

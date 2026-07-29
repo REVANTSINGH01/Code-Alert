@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../provider/theme_provider.dart';
 import '../services/api_service.dart';
 import 'main_layout.dart';
+import '../models/reminder_model.dart';
+
 
 class RemindersPage extends StatefulWidget {
   const RemindersPage({super.key});
@@ -14,7 +16,7 @@ class RemindersPage extends StatefulWidget {
 
 class _RemindersPageState extends State<RemindersPage> {
   bool isLoading = false;
-  List reminders = [];
+  List<Reminder> reminders = [];
   String searchQuery = "";
 
   @override
@@ -32,23 +34,14 @@ class _RemindersPageState extends State<RemindersPage> {
 
     try {
       final data = await ApiService.getReminders();
+
       if (!mounted) return;
 
       setState(() {
         reminders = data;
       });
     } catch (e) {
-      print(e);
-      // Fallback/Mock data for UI testing if API fails
-      if(mounted && reminders.isEmpty){
-        setState(() {
-          reminders = [
-            {"contest_name": "LeetCode Weekly Contest 380", "platform": "LeetCode", "start_time": "01d 04h 32m 15s", "date": "Today, 8:00 PM", "active": true},
-            {"contest_name": "CodeChef Starters 115", "platform": "CodeChef", "start_time": "02d 11h 05m 40s", "date": "Jan 21, 2024", "time": "Wed, 7:30 PM", "active": true},
-            {"contest_name": "Codeforces Round 919 (Div. 2)", "platform": "Codeforces", "start_time": "05h 22m 10s", "date": "Today, 10:00 PM", "active": true},
-          ];
-        });
-      }
+      debugPrint(e.toString());
     } finally {
       if (mounted) {
         setState(() {
@@ -79,8 +72,9 @@ class _RemindersPageState extends State<RemindersPage> {
 
     // Filter reminders based on search query
     final filteredReminders = reminders.where((r) {
-      final title = r["contest_name"]?.toString().toLowerCase() ?? "";
-      return title.contains(searchQuery.toLowerCase());
+      return r.contestName
+          .toLowerCase()
+          .contains(searchQuery.toLowerCase());
     }).toList();
 
     return Scaffold(
@@ -152,8 +146,8 @@ class _RemindersPageState extends State<RemindersPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 itemCount: filteredReminders.length,
                 itemBuilder: (context, index) {
-                  final reminder = filteredReminders[index];
-                  bool isActive = reminder["active"] ?? true;
+                  final Reminder reminder = filteredReminders[index];
+                  bool isActive = true;
                   bool isDarkMode = theme.bgColor == const Color(0xFF121212);
                   return Container(
                     margin: const EdgeInsets.only(bottom: 16),
@@ -186,7 +180,7 @@ class _RemindersPageState extends State<RemindersPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: SvgPicture.asset(
-                            getIcon(reminder["platform"]),
+                            getIcon(null),
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -197,7 +191,7 @@ class _RemindersPageState extends State<RemindersPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                reminder["contest_name"] ?? "Contest Name",
+                                reminder.contestName,
                                 style: TextStyle(
                                   color: textColor,
                                   fontSize: 16,
@@ -205,28 +199,20 @@ class _RemindersPageState extends State<RemindersPage> {
                                 ),
                               ),
                               const SizedBox(height: 6),
-                              if (reminder["date"] != null) ...[
-                                Text(
-                                  "Date: ${reminder["date"]}",
-                                  style: TextStyle(
-                                    color: textColor.withValues(alpha:0.6),
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                              ],
                               Text(
-                                "Starts in: ${reminder["start_time"] ?? '--'}",
+                                "Reminder Time",
                                 style: TextStyle(
-                                  color: textColor.withValues(alpha:0.8),
+                                  color: textColor.withValues(alpha: 0.6),
                                   fontSize: 13,
                                 ),
                               ),
+
                               const SizedBox(height: 2),
+
                               Text(
-                                reminder["time"] ?? reminder["date"] ?? '--',
+                                reminder.reminderTime.toLocal().toString(),
                                 style: TextStyle(
-                                  color: textColor.withValues(alpha:0.6),
+                                  color: textColor.withValues(alpha: 0.8),
                                   fontSize: 13,
                                 ),
                               ),
@@ -240,12 +226,7 @@ class _RemindersPageState extends State<RemindersPage> {
                           children: [
                             Switch(
                               value: isActive,
-                              onChanged: (val) {
-                                setState(() {
-                                  // TODO: Update state locally and send to backend
-                                  reminder["active"] = val;
-                                });
-                              },
+                              onChanged: null,
                               activeThumbColor: Colors.white,
                               activeTrackColor: accentBlue,
                               inactiveThumbColor: Colors.grey,
