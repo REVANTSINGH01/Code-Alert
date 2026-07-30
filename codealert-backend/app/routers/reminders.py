@@ -45,7 +45,7 @@ async def create_reminder(reminder: ReminderCreate,user_id=Depends(get_current_u
 async def get_user_reminders(user_id: str = Depends(get_current_user)):
 
     # Find all reminders matching this user_id
-    delete=await cleanup_expired_reminders(user_id)
+    await cleanup_expired_reminders(user_id)
     cursor = reminder_collection.find({"user_id": user_id}).sort("reminder_time",1)
     reminders = await cursor.to_list(length=100) # Limit to 100 for safety
     

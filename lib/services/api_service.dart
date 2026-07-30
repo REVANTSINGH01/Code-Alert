@@ -269,12 +269,22 @@
       );
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        print("syncDashboard() called");
         return data;
       }
       throw Exception(
         data["detail"] ?? "Dashboard Sync Failed",
       );
+    }
+
+    static Future<void> deleteReminder(String reminderId) async {
+      final response = await authenticatedRequest(
+        method: "DELETE",
+        url: "$baseUrl/reminder/$reminderId",
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception("Failed to delete reminder");
+      }
     }
 
     static Future<Map<String, dynamic>> requestPasswordReset(String email) async {
