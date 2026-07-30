@@ -7,7 +7,7 @@
   
     // Android Emulator URL
     static const String baseUrl = "http://192.168.1.18:8000";
-  
+    static Future<bool>? _refreshFuture;
   
     static Future<Map<String, dynamic>> signup({
       required String name,
@@ -129,7 +129,21 @@
     // GET REMINDERS
     // =========================
 
-    static Future<bool> refreshAccessToken() async{
+    static Future<bool> refreshAccessToken() async {
+      if (_refreshFuture != null) {
+        return _refreshFuture!;
+      }
+
+      _refreshFuture = _performRefresh();
+
+      try {
+        return await _refreshFuture!;
+      } finally {
+        _refreshFuture = null;
+      }
+    }
+
+    static Future<bool> _performRefresh() async{
       final prefs=await SharedPreferences.getInstance();
       final refreshToken=prefs.getString("refresh_token");
       if(refreshToken==null) {

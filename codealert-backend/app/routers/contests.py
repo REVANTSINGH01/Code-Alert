@@ -111,7 +111,20 @@ async def get_lc_contests(client: httpx.AsyncClient):
                 response.text[:300],
             )
             return []
-        data=response.json()
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=response.text,
+            )
+
+        try:
+            data = response.json()
+        except Exception:
+            print(response.text)
+            raise HTTPException(
+                status_code=500,
+                detail="Invalid JSON received from API",
+            )
         now =datetime.datetime.now(datetime.timezone.utc)
         three_days=(now+datetime.timedelta(days=7))
         contests=[]
@@ -141,12 +154,31 @@ async def get_lc_contests(client: httpx.AsyncClient):
     
 async def get_cc_contests(client: httpx.AsyncClient):
     url="https://www.codechef.com/api/list/contests/all"
+    headers = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/138.0.0.0 Safari/537.36"
+    ),
+    "Accept": "application/json",
+    }
     try: 
         
-        response = await client.get(url)
-        data=response.json()
-        if data["status"] != "success":
-            raise HTTPException(status_code=400, detail="Failed to fetch from CodeChef")
+        response = await client.get(url,headers=headers)
+
+        if response.status_code != 200:
+            logger.error(
+                "CodeChef returned %s: %s",
+                response.status_code,
+                response.text[:300],
+            )
+            return []
+
+        try:
+            data = response.json()
+        except ValueError:
+            logger.error("CodeChef did not return JSON.")
+            return []
         contests = []
         now =datetime.datetime.now(
             datetime.timezone.utc
@@ -172,9 +204,9 @@ async def get_cc_contests(client: httpx.AsyncClient):
                 })
         return contests
     except httpx.HTTPError as e:
-        logger.warning("Failed to connect to LeetCode: %s", e)
+        logger.warning("Failed to connect to CodeChef: %s", e)
         return []
 
     except Exception:
-        logger.exception("Unexpected error while fetching LeetCode contests.")
+        logger.exception("Unexpected error while fetching CodeChef contests.")
         return []
