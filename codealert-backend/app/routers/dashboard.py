@@ -14,6 +14,7 @@ import asyncio
 from app.routers.codeforces import get_cf_profile
 from app.routers.leetcode import get_lc_profile
 from app.routers.codechef import get_cc_profile
+from app.utils.reminder_utils import cleanup_expired_reminders
 
 router = APIRouter(tags=["Dashboard"])
 
@@ -32,6 +33,11 @@ async def sync_user_dashboard(
                 status_code=404,
                 detail="User not found"
             )
+        try:
+            deleted = await cleanup_expired_reminders(user_id)
+            print(f"Deleted {deleted} expired reminders")
+        except Exception as e:
+            print(f"Reminder cleanup failed: {e}")
 
         handles = user.get("handles", {})
 

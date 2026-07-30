@@ -50,6 +50,59 @@ class _RemindersPageState extends State<RemindersPage> {
       }
     }
   }
+  Future<void> deleteReminder(String id) async {
+    try {
+      await ApiService.deleteReminder(id);
+
+      if (!mounted) return;
+
+      setState(() {
+        reminders.removeWhere((r) => r.id == id);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Reminder deleted successfully"),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed to delete reminder\n$e"),
+        ),
+      );
+    }
+  }
+
+  Future<void> showDeleteDialog(String id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Delete Reminder"),
+          content: const Text(
+            "Are you sure you want to delete this reminder?",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Delete"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      await deleteReminder(id);
+    }
+  }
 
   // Helper function to get icons just like in your home page
   String getIcon(String? platform) {
@@ -170,7 +223,6 @@ class _RemindersPageState extends State<RemindersPage> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // 🔷 Platform Icon
                         Container(
                           width: 48,
                           height: 48,
@@ -185,7 +237,6 @@ class _RemindersPageState extends State<RemindersPage> {
                         ),
                         const SizedBox(width: 16),
 
-                        // 🔷 Content
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,24 +272,28 @@ class _RemindersPageState extends State<RemindersPage> {
                         ),
 
                         // 🔷 Toggle Switch
+                        // 🔷 Actions
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Switch(
-                              value: isActive,
-                              onChanged: null,
-                              activeThumbColor: Colors.white,
-                              activeTrackColor: accentBlue,
-                              inactiveThumbColor: Colors.grey,
-                              inactiveTrackColor: Colors.grey.withValues(alpha:0.3),
-                            ),
-                            Text(
-                              isActive ? "Active" : "Off",
-                              style: TextStyle(
-                                color: isActive ? accentBlue : Colors.grey,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
+                            IconButton(
+                              icon: Icon(
+                                Icons.edit_outlined,
+                                color: accentBlue,
                               ),
+                              onPressed: () {
+                                // TODO: Edit reminder (Phase 3)
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: Colors.red,
+                              ),
+                              onPressed: () {
+                                showDeleteDialog(reminder.id);
+                              },
                             ),
                           ],
                         ),
