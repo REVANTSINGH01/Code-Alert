@@ -29,8 +29,7 @@ class _LoginPageState extends State<LoginPage> {
         password: passwordController.text.trim(),
       );
       print("2 API DONE");
-      await SharedPreferences.getInstance()
-          .then((prefs) => prefs.setBool("is_logged_in", true));
+
       if (!mounted) return;
       print(user);
       Navigator.pushReplacementNamed(context, '/main_layout');

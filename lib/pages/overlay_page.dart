@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import '../widgets/reminder_bottom.dart';
 String _formatDate(String isoString) {
   try {
     DateTime date = DateTime.parse(isoString);
@@ -208,8 +208,10 @@ void showContestDetails(BuildContext context, Map contest, Color homepageTextCol
                     icon: const Icon(Icons.notifications_none, size: 20),
                     label: const Text("Set Reminder", style: TextStyle(fontSize: 15)),
                     onPressed: () {
-                      // Call your ApiService.createReminder here!
-
+                      showReminderBottomSheet(
+                        context: context,
+                        contest: contest,
+                      );
                     },
                   ),
                 ),

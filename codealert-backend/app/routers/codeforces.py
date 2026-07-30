@@ -14,7 +14,7 @@ router = APIRouter(tags=["Codeforces Profile"])
 async def get_cf_profile(
 cf_handle:str,user_id=Depends(get_current_user)):
     try:  
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(30.0)) as client:
         # 1. Fetch basic info (Rating, Rank) from Codeforces
             info_url = f"https://codeforces.com/api/user.info?handles={cf_handle}"
             info_res = await client.get(info_url)

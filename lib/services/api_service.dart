@@ -1,6 +1,7 @@
   import 'dart:convert';
   import 'package:http/http.dart' as http;
   import 'package:shared_preferences/shared_preferences.dart';
+  import '../models/reminder_model.dart';
 
   
   class ApiService {
@@ -164,18 +165,44 @@
         await prefs.setString("refresh_token", data["refresh_token"]);
         return true;
       }
-      await prefs.clear();
+      await prefs.remove("access_token");
+      await prefs.remove("refresh_token");
+      await prefs.remove("user_id");
+      await prefs.remove("username");
+      await prefs.remove("is_admin");
       return false;
 
     }
 
-    static Future<List<dynamic>> getReminders() async {
+    static Future<List<Reminder>> getReminders() async {
 
-      final response = await authenticatedRequest(method: "GET",url:"$baseUrl/reminders/",);
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception("Failed to load reminders: ${response.body}");
+      final response = await authenticatedRequest(method: "GET",url:"$baseUrl/reminders",);
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+      if (response.statusCode != 200) {
+        throw Exception("Failed to load reminders");
+      }
+      final List<dynamic> data = jsonDecode(response.body);
+
+      return data
+          .map((e) => Reminder.fromJson(e))
+          .toList();
+    }
+
+    static Future<void> updateReminder({
+      required String id,
+      required DateTime reminderTime,
+    }) async {
+      final response = await authenticatedRequest(
+        method: "PUT",
+        url: "$baseUrl/reminder/$id",
+        body: {
+          "reminder_time": reminderTime.toUtc().toIso8601String(),
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception("Failed to update reminder");
       }
     }
 
@@ -199,30 +226,30 @@
             return http.get(
               Uri.parse(url),
               headers: headers,
-            );
+            ).timeout(const Duration(seconds: 10));
           case "POST":
             return http.post(
               Uri.parse(url),
               headers: headers,
               body: body==null ? null: jsonEncode(body),
-            );
+            ).timeout(const Duration(seconds: 10));
           case "PUT":
             return http.put(
               Uri.parse(url),
               headers: headers,
               body: body==null ? null: jsonEncode(body),
-            );
+            ).timeout(const Duration(seconds: 10));
           case "PATCH":
             return http.patch(
               Uri.parse(url),
               headers: headers,
               body: body == null ? null : jsonEncode(body),
-            );
+            ).timeout(const Duration(seconds: 10));
           case "DELETE":
             return http.delete(
               Uri.parse(url),
               headers: headers,
-            );
+            ).timeout(const Duration(seconds: 10));
           default:
             throw Exception("Unsupported HTTP method");
         }
@@ -234,7 +261,10 @@
           throw Exception("Session Expired");
         }
         accessToken= prefs.getString("access_token");
-        response =await sendRequest(accessToken!);
+        if (accessToken == null) {
+          throw Exception("Failed to obtain new access token");
+        }
+        response =await sendRequest(accessToken);
       }
       return response;
     }
@@ -242,20 +272,28 @@
     // =========================
     // CREATE REMINDER
     // =========================
-  
+
     static Future<Map<String, dynamic>> createReminder({
-      required String userId,
       required String contestName,
+      required String contestStart,
       required String reminderTime,
     }) async {
-      Map<String,dynamic> body={};
-      body["user_id"]=userId;
-      body["contest_name"]=contestName;
-      body["reminder_time"]=reminderTime;
-      final response = await authenticatedRequest(method: "POST", url:"$baseUrl/reminder",body:body,);
+
+      final body = {
+        "contest_name": contestName,
+        "contest_start": contestStart,
+        "reminder_time": reminderTime,
+      };
+
+      final response = await authenticatedRequest(
+        method: "POST",
+        url: "$baseUrl/reminder",
+        body: body,
+      );
+
       final data = jsonDecode(response.body);
-      if (response.statusCode == 200 ||
-          response.statusCode == 201) {
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return data;
       } else {
         throw Exception(data["detail"]);
