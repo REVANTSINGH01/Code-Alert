@@ -16,10 +16,11 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver{
   int _currentIndex = 0;
 
   // The 3 main pages of your app
-  final List<Widget> _pages = const [
-    HomePage(),
-    RemindersPage(), // Make sure this matches your actual Reminders class name
-    ProfilePage(),
+  final reminderKey = GlobalKey<RemindersPageState>();
+  late final List<Widget> _pages = [
+    const HomePage(),
+    RemindersPage(key: reminderKey),
+    const ProfilePage(),
   ];
 
   @override
@@ -48,8 +49,12 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver{
           type: BottomNavigationBarType.fixed,
           onTap: (index) {
             setState(() {
-              _currentIndex = index; // Instantly swaps the page without flickering
+              _currentIndex = index;
             });
+
+            if (index == 1) {
+              reminderKey.currentState?.loadReminders();
+            }
           },
           items: const [
             BottomNavigationBarItem(

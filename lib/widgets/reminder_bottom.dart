@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../utils./reminder_pickup.dart';
 
-Future<void> showReminderBottomSheet({
+Future<bool?> showReminderBottomSheet({
   required BuildContext context,
   required Map contest,
+  bool isEdit = false,
+  String? reminderId,
+  DateTime? currentReminderTime,
 }) {
   return showModalBottomSheet(
     context: context,
@@ -16,16 +20,25 @@ Future<void> showReminderBottomSheet({
     ),
     builder: (_) => ReminderBottomSheet(
       contest: contest,
+      isEdit: isEdit,
+      reminderId: reminderId,
+      currentReminderTime: currentReminderTime,
     ),
   );
 }
 
 class ReminderBottomSheet extends StatefulWidget {
   final Map contest;
+  final bool isEdit;
+  final String? reminderId;
+  final DateTime? currentReminderTime;
 
   const ReminderBottomSheet({
     super.key,
     required this.contest,
+    this.isEdit = false,
+    this.reminderId,
+    this.currentReminderTime,
   });
 
   @override
@@ -38,27 +51,68 @@ class _ReminderBottomSheetState
 
   bool isLoading = false;
 
-  final List<int> reminderOptions = [
-    5,
-    10,
-    15,
-    30,
-    60,
-    1440,
-  ];
 
-  int selectedMinutes = 15;
+  late DateTime selectedReminderTime;
 
-  String getLabel(int minutes) {
-    if (minutes == 1440) {
-      return "1 Day Before";
+  @override
+  void initState() {
+    super.initState();
+
+    final contestStart =
+    DateTime.parse(widget.contest["start_time"]);
+
+    if (widget.isEdit &&
+        widget.currentReminderTime != null) {
+      selectedReminderTime =
+      widget.currentReminderTime!;
+    } else {
+      selectedReminderTime =
+          contestStart.subtract(
+            const Duration(minutes: 15),
+          );
     }
+  }
 
-    if (minutes >= 60) {
-      return "${minutes ~/ 60} Hour Before";
-    }
+  Future<void> pickReminderDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: selectedReminderTime,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2035),
+    );
 
-    return "$minutes Minutes Before";
+    if (picked == null) return;
+
+    setState(() {
+      selectedReminderTime = DateTime(
+        picked.year,
+        picked.month,
+        picked.day,
+        selectedReminderTime.hour,
+        selectedReminderTime.minute,
+      );
+    });
+  }
+
+  Future<void> pickReminderTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(
+        selectedReminderTime,
+      ),
+    );
+
+    if (picked == null) return;
+
+    setState(() {
+      selectedReminderTime = DateTime(
+        selectedReminderTime.year,
+        selectedReminderTime.month,
+        selectedReminderTime.day,
+        picked.hour,
+        picked.minute,
+      );
+    });
   }
 
   Future<void> saveReminder() async {
@@ -71,25 +125,31 @@ class _ReminderBottomSheetState
         widget.contest["start_time"],
       );
 
-      final reminderDateTime = contestStartTime.subtract(
-        Duration(minutes: selectedMinutes),
-      );
+      final reminderDateTime =selectedReminderTime;
 
-      await ApiService.createReminder(
-        contestName: widget.contest["name"],
-        contestStart: DateTime.parse(widget.contest["start_time"])
-            .toUtc()
-            .toIso8601String(),
-        reminderTime: reminderDateTime.toUtc().toIso8601String(),
-      );
+      if (widget.isEdit) {
+        await ApiService.updateReminder(
+          id: widget.reminderId!,
+          reminderTime: reminderDateTime,
+        );
+      } else {
+        await ApiService.createReminder(
+          contestName: widget.contest["name"],
+          contestStart: contestStartTime.toUtc().toIso8601String(),
+          reminderTime: reminderDateTime.toUtc().toIso8601String(),
+        );
+      }
+
       if (!mounted) return;
 
-      Navigator.pop(context);
+      Navigator.pop(context, true);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            "Reminder Created Successfully",
+            widget.isEdit
+                ? "Reminder Updated Successfully"
+                : "Reminder Created Successfully",
           ),
         ),
       );
@@ -125,9 +185,11 @@ class _ReminderBottomSheetState
           mainAxisSize: MainAxisSize.min,
           children: [
 
-            const Text(
-              "Set Reminder",
-              style: TextStyle(
+            Text(
+              widget.isEdit
+                  ? "Edit Reminder"
+                  : "Set Reminder",
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -136,24 +198,93 @@ class _ReminderBottomSheetState
 
             const SizedBox(height: 24),
 
-            ...reminderOptions.map((minutes) {
-              return RadioListTile<int>(
-                value: minutes,
-                groupValue: selectedMinutes,
-                activeColor: Colors.cyanAccent,
-                title: Text(
-                  getLabel(minutes),
-                  style: const TextStyle(
-                    color: Colors.white,
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF262637),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Contest",
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 13,
+                    ),
                   ),
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    selectedMinutes = value!;
-                  });
-                },
-              );
-            }),
+                  const SizedBox(height: 6),
+                  Text(
+                    widget.contest["name"],
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    widget.contest["start_time"],
+                    style: const TextStyle(
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Card(
+              color: const Color(0xFF262637),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Column(
+                children: [
+
+                  ListTile(
+                    leading: const Icon(
+                      Icons.calendar_today,
+                      color: Colors.cyanAccent,
+                    ),
+                    title: const Text(
+                      "Reminder Date",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    trailing: Text(
+                      "${selectedReminderTime.day}/${selectedReminderTime.month}/${selectedReminderTime.year}",
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                    onTap: pickReminderDate,
+                  ),
+
+                  const Divider(height: 1),
+
+                  ListTile(
+                    leading: const Icon(
+                      Icons.access_time,
+                      color: Colors.cyanAccent,
+                    ),
+                    title: const Text(
+                      "Reminder Time",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    trailing: Text(
+                      TimeOfDay.fromDateTime(
+                        selectedReminderTime,
+                      ).format(context),
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                    onTap: pickReminderTime,
+                  ),
+                ],
+              ),
+            ),
 
             const SizedBox(height: 20),
 
@@ -166,9 +297,11 @@ class _ReminderBottomSheetState
                     : saveReminder,
                 child: isLoading
                     ? const CircularProgressIndicator()
-                    : const Text(
-                  "Save Reminder",
-                ),
+                    : Text(
+                  widget.isEdit
+                      ? "Update Reminder"
+                      : "Save Reminder",
+                )
               ),
             ),
           ],

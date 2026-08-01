@@ -5,16 +5,17 @@ import '../provider/theme_provider.dart';
 import '../services/api_service.dart';
 import 'main_layout.dart';
 import '../models/reminder_model.dart';
-
+import 'package:intl/intl.dart';
+import '../widgets/reminder_bottom.dart';
 
 class RemindersPage extends StatefulWidget {
   const RemindersPage({super.key});
 
   @override
-  State<RemindersPage> createState() => _RemindersPageState();
+  State<RemindersPage> createState() => RemindersPageState();
 }
 
-class _RemindersPageState extends State<RemindersPage> {
+class RemindersPageState extends State<RemindersPage> {
   bool isLoading = false;
   List<Reminder> reminders = [];
   String searchQuery = "";
@@ -50,6 +51,73 @@ class _RemindersPageState extends State<RemindersPage> {
       }
     }
   }
+<<<<<<< Updated upstream
+=======
+  Future<void> deleteReminder(String id) async {
+    try {
+      await ApiService.deleteReminder(id);
+
+      if (!mounted) return;
+
+      print("Deleting id: $id");
+
+      for (final r in reminders) {
+        print("Reminder id: ${r.id}");
+      }
+
+      setState(() {
+        reminders.removeWhere((r) {
+          print("Comparing ${r.id} with $id");
+          return r.id == id;
+        });
+
+        print("Remaining reminders: ${reminders.length}");
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Reminder deleted successfully"),
+        ),
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
+  String formatDate(DateTime dateTime) {
+    return DateFormat("dd MMM yyyy").format(dateTime.toLocal());
+  }
+
+  String formatTime(DateTime dateTime) {
+    return DateFormat("hh:mm a").format(dateTime.toLocal());
+  }
+  Future<void> showDeleteDialog(String id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Delete Reminder"),
+          content: const Text(
+            "Are you sure you want to delete this reminder?",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Delete"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      await deleteReminder(id);
+    }
+  }
+>>>>>>> Stashed changes
 
   // Helper function to get icons just like in your home page
   String getIcon(String? platform) {
@@ -104,7 +172,6 @@ class _RemindersPageState extends State<RemindersPage> {
 
       body: Column(
         children: [
-          // 🔍 Search Bar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
             child: Container(
@@ -128,7 +195,7 @@ class _RemindersPageState extends State<RemindersPage> {
             ),
           ),
 
-          // 📋 List of Reminders
+
           Expanded(
             child: isLoading
                 ? Center(child: CircularProgressIndicator(color: accentBlue))
@@ -198,27 +265,82 @@ class _RemindersPageState extends State<RemindersPage> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(height: 6),
-                              Text(
-                                "Reminder Time",
-                                style: TextStyle(
-                                  color: textColor.withValues(alpha: 0.6),
-                                  fontSize: 13,
-                                ),
+
+                              const SizedBox(height: 12),
+
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.notifications_active_outlined,
+                                    color: Colors.orange,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const SizedBox(
+                                    width: 75,
+                                    child: Text(
+                                      "Reminder",
+                                      style: TextStyle(fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
+                                  Text(
+                                    formatTime(reminder.reminderTime),
+                                    style: TextStyle(color: textColor),
+                                  ),
+                                ],
                               ),
 
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 8),
 
-                              Text(
-                                reminder.reminderTime.toLocal().toString(),
-                                style: TextStyle(
-                                  color: textColor.withValues(alpha: 0.8),
-                                  fontSize: 13,
-                                ),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.emoji_events_outlined,
+                                    color: Colors.green,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const SizedBox(
+                                    width: 75,
+                                    child: Text(
+                                      "Contest",
+                                      style: TextStyle(fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
+                                  Text(
+                                    formatTime(reminder.contestStart),
+                                    style: TextStyle(color: textColor),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 8),
+
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.calendar_today_outlined,
+                                    color: Colors.blue,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const SizedBox(
+                                    width: 75,
+                                    child: Text(
+                                      "Date",
+                                      style: TextStyle(fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
+                                  Text(
+                                    formatDate(reminder.contestStart),
+                                    style: TextStyle(color: textColor),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ),
+<<<<<<< Updated upstream
 
                         // 🔷 Toggle Switch
                         Column(
@@ -231,6 +353,32 @@ class _RemindersPageState extends State<RemindersPage> {
                               activeTrackColor: accentBlue,
                               inactiveThumbColor: Colors.grey,
                               inactiveTrackColor: Colors.grey.withValues(alpha:0.3),
+=======
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                Icons.edit_outlined,
+                                color: accentBlue,
+                              ),
+                              onPressed: () async {
+                                final updated = await showReminderBottomSheet(
+                                  context: context,
+                                  contest: {
+                                    "name": reminder.contestName,
+                                    "start_time": reminder.contestStart.toUtc().toIso8601String(),
+                                  },
+                                  isEdit: true,
+                                  reminderId: reminder.id,
+                                  currentReminderTime: reminder.reminderTime,
+                                );
+
+                                if (updated == true && mounted) {
+                                  await loadReminders();
+                                }
+                              },
+>>>>>>> Stashed changes
                             ),
                             Text(
                               isActive ? "Active" : "Off",

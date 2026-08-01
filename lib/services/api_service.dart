@@ -300,6 +300,20 @@
       );
     }
 
+<<<<<<< Updated upstream
+=======
+    static Future<void> deleteReminder(String reminderId) async {
+      final response = await authenticatedRequest(
+        method: "DELETE",
+        url: "$baseUrl/reminder/$reminderId",
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception("Failed to delete reminder");
+      }
+    }
+
+>>>>>>> Stashed changes
     static Future<Map<String, dynamic>> requestPasswordReset(String email) async {
       Map<String,dynamic> body={};
       body["email"]=email;

@@ -87,7 +87,7 @@ async def delete_reminder(reminder_id: str,user_id=Depends(get_current_user)):
         reminder_object_id = ObjectId(reminder_id)
     except Exception:
         raise HTTPException(
-            status_code=400,
+            status_code=400,    
             detail="Invalid reminder id",
         )
     
