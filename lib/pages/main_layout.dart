@@ -38,7 +38,6 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver{
         children: _pages,
       ),
 
-      // 🔷 The permanent Bottom Navigation Bar
       bottomNavigationBar: SafeArea(
         child: BottomNavigationBar(
           backgroundColor: cardColor,

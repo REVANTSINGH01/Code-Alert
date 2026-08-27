@@ -7,7 +7,7 @@ import '../services/api_service.dart';
 import 'dart:async';
 import '../pages/custom_calendar.dart';
 import '../pages/overlay_page.dart';
-
+import '../services/notification_services.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
   @override
@@ -221,6 +221,18 @@ class _HomePageState extends State<HomePage> {
               const Text(
                 "Upcoming Contests",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  await NotificationService.scheduleReminder(
+                    id: 100,
+                    contestName: "Test Contest",
+                    reminderTime: DateTime.now().add(
+                      const Duration(seconds: 10),
+                    ),
+                  );
+                },
+                child: const Text("Test Scheduled Notification"),
               ),
               Center(
                 child: SizedBox(

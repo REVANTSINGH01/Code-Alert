@@ -2,7 +2,7 @@
   import 'package:http/http.dart' as http;
   import 'package:shared_preferences/shared_preferences.dart';
   import '../models/reminder_model.dart';
-
+  import '../services/notification_services.dart';
   
   class ApiService {
   
@@ -278,7 +278,6 @@
       required String contestStart,
       required String reminderTime,
     }) async {
-
       final body = {
         "contest_name": contestName,
         "contest_start": contestStart,
@@ -294,6 +293,20 @@
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        final reminderId = data["id"].toString();
+
+        final notificationId =
+        NotificationService.notificationId(reminderId);
+
+        final parsedReminderTime =
+        DateTime.parse(data["reminder_time"]);
+
+        await NotificationService.scheduleReminder(
+          id: notificationId,
+          contestName: data["contest_name"],
+          reminderTime: parsedReminderTime,
+        );
+
         return data;
       } else {
         throw Exception(data["detail"]);
