@@ -37,13 +37,12 @@ class ResetTokenRecordDB(BaseModel):
 class ReminderCreate(BaseModel):
     contest_name: str
     contest_start: datetime
-    reminder_time: str
-
+    reminder_time: datetime
 class ReminderResponse(BaseModel):
     id: str
     contest_name: str
     contest_start: datetime
-    reminder_time: str
+    reminder_time: datetime
 
 class ReminderUpdate(BaseModel):
     reminder_time: datetime
@@ -52,7 +51,7 @@ class ContestResponse(BaseModel):
     name: str
     platform: str
     start_time: str
-    duration: int  # Duration in 
+    duration: int
     
 class CFProfileResponse(BaseModel):
     cf_handle: str

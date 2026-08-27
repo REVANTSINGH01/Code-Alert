@@ -16,32 +16,46 @@ from app.schemas.schemas import ReminderCreate, ReminderResponse, ReminderUpdate
 
 router = APIRouter(tags=["Reminders"])
 
-@router.post("/reminder", response_model=ReminderResponse, status_code=status.HTTP_201_CREATED)
-async def create_reminder(reminder: ReminderCreate,user_id=Depends(get_current_user)):
-    
+@router.post(
+    "/reminder",
+    response_model=ReminderResponse,
+    status_code=status.HTTP_201_CREATED
+)
+async def create_reminder(
+    reminder: ReminderCreate,
+    user_id: str = Depends(get_current_user)
+):
+    existing = await reminder_collection.find_one({
+        "user_id": user_id,
+        "contest_name": reminder.contest_name
+    })
 
-    # Insert into database 
-    existing= await reminder_collection.find_one({"user_id": user_id,"contest_name": reminder.contest_name})
     if existing:
-        raise HTTPException(status_code=409,detail="Reminder already exists.")
+        raise HTTPException(
+            status_code=409,
+            detail="Reminder already exists."
+        )
+
     reminder_dict = reminder.model_dump()
-    reminder_dict["user_id"] = user_id 
+    reminder_dict["user_id"] = user_id
     reminder_dict["created_at"] = datetime.now(timezone.utc)
     reminder_dict["status"] = "PENDING"
 
     try:
         result = await reminder_collection.insert_one(reminder_dict)
-
     except DuplicateKeyError:
-
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Reminder already exists.",
+            detail="Reminder already exists."
         )
-    # Fetch and format the created reminder
-    new_reminder = await reminder_collection.find_one({"_id": result.inserted_id})
+
+    new_reminder = await reminder_collection.find_one({
+        "_id": result.inserted_id
+    })
+
     new_reminder["id"] = str(new_reminder["_id"])
     del new_reminder["_id"]
+
     return new_reminder
 
 # Get all reminders for a specific user

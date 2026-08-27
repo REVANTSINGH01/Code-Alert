@@ -12,8 +12,12 @@ import 'package:my_app/pages/sign_up.dart';
 import 'package:my_app/pages/user_setup.dart';
 import 'package:my_app/pages/admin_dashboard.dart';
 import 'package:my_app/pages/main_layout.dart';
+import 'package:my_app/services/notification_services.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.initialize();
+  await NotificationService.requestPermission();
+  await NotificationService.requestExactAlarmsPermission();
   final prefs=await SharedPreferences.getInstance();
   String? accessToken=prefs.getString("access_token");
   String? refreshToken=prefs.getString("refresh_token");
